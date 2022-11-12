@@ -22,8 +22,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class Swagger2 {
 
-    //    http://localhost:9999/swagger-ui.html     原路径
-    //    http://localhost:9999/doc.html            新路径
+    //    http://localhost:8080/swagger-ui.html     原路径
+    //    http://localhost:8080/doc.html            新路径
 
     @Value("${custom.swagger.enable}")
     private boolean enableSwagger;

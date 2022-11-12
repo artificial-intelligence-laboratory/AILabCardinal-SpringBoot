@@ -65,6 +65,11 @@ public class UserInfo implements Serializable {
     private String major;
 
     /**
+     * 班级
+     */
+    private Integer classNumber;
+
+    /**
      * github id
      */
     private String githubId;
@@ -73,4 +78,10 @@ public class UserInfo implements Serializable {
      * 宿舍号
      */
     private String dormitoryNumber;
+
+    /**
+     * 毕业时间
+     */
+    private String graduationTime;
+
 }

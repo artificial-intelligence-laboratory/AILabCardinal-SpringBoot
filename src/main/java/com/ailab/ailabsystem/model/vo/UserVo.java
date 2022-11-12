@@ -36,8 +36,4 @@ public class UserVo implements Serializable {
      */
     private String nickname;
 
-    /**
-     * 用户权限（0为根用户，1为管理员，2为普通用户）
-     */
-    private Integer userRight;
 }

@@ -4,7 +4,7 @@ import com.ailab.ailabsystem.annotation.AuthCheck;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserRole;
 import com.ailab.ailabsystem.exception.CustomException;
-import com.ailab.ailabsystem.model.vo.UserVo;
+import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.UserHolder;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -31,7 +31,7 @@ public class AuthorizationInterceptor {
                                 AuthCheck authCheck) throws Throwable {
         // 获取注解上的角色
         UserRole userRole = authCheck.mustRole();
-        UserVo user = UserHolder.getUser();
+        User user = UserHolder.getUser();
         // 有对应权限才通过
         if (user.getUserRight() != userRole.getCode()) {
             throw new CustomException(ResponseStatusEnum.NO_AUTH_ERROR);

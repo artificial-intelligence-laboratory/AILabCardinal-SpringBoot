@@ -47,10 +47,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 登录成功，生成随机token
         String token = UUID.randomUUID().toString();
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
+        userVo.setNickname(userLogin.getUserInfo().getRealName());
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
         // 转成json
-        String userJson = JSONUtil.toJsonStr(userVo);
+        String userJson = JSONUtil.toJsonStr(userLogin);
         // 存入redis
         redis.set(loginUserKey, userJson);
         HashMap<String, Object> map = new HashMap<>();

@@ -37,12 +37,12 @@ public class InOutRegistration implements Serializable {
     /**
      * 签到者班级
      */
-    private String signInUserClass;
+    private Integer signInUserClass;
 
     /**
      * 学号
      */
-    private Integer studentNumber;
+    private String studentNumber;
 
     /**
      * 任务

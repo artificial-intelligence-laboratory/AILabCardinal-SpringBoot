@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -43,7 +44,7 @@ public class LoginController {
             @ApiImplicitParam(name = "password", value = "密码", dataType = "String", required = true, paramType = "body"),
     })
     @PostMapping("/login")
-    public R<Object> userLogin(@RequestBody @Valid LoginRequest loginRequest){
+    public R<Object> userLogin(@ApiIgnore @RequestBody @Valid LoginRequest loginRequest){
         return userService.login(loginRequest);
     }
 

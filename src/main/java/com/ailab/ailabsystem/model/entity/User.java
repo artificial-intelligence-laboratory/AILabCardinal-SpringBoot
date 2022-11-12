@@ -65,8 +65,8 @@ public class User implements Serializable {
     private Integer userStatus;
 
     /**
-     * 别名，联查user_info表获得
+     * 用户信息
      */
     @TableField(exist = false)
-    private String nickname;
+    private UserInfo userInfo;
 }

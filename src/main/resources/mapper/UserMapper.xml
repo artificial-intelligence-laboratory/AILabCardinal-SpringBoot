@@ -5,21 +5,46 @@
 <mapper namespace="com.ailab.ailabsystem.mapper.UserMapper">
 
     <resultMap id="userMapper" type="user">
-        <id property="userId" column="user_id"/>
+        <id property="userId" column="uid"/>
         <result property="studentNumber" column="student_number"/>
         <result property="password" column="password"/>
-        <result property="nickname" column="nickname"/>
         <result property="avatar" column="avatar"/>
         <result property="email" column="email"/>
         <result property="userRight" column="user_right"/>
         <result property="lastOnlineIp" column="lastOnlineIp"/>
         <result property="lastOnlineIpAddress" column="last_online_ip_address"/>
         <result property="lastOnlineIp" column="last_online_ip"/>
+        <result property="userStatus" column="user_status"/>
+        <association property="userInfo" javaType="userInfo">
+            <id property="userInfoId" column="uiid"/>
+            <result property="realName" column="real_name"/>
+            <result property="birthday" column="birthday"/>
+            <result property="college" column="college"/>
+            <result property="developmentDirection" column="development_direction"/>
+            <result property="dormitoryNumber" column="dormitory_number"/>
+            <result property="enrollmentYear" column="enrollment_year"/>
+            <result property="githubId" column="github_id"/>
+            <result property="graduationTime" column="graduation_time"/>
+            <result property="joinAilabTime" column="join_ailab_time"/>
+            <result property="major" column="major"/>
+            <result property="classNumber" column="class_number"/>
+            <result property="nativePlace" column="native_place"/>
+        </association>
     </resultMap>
 
-    <select id="selectByStuNumAndPwd" resultMap="userMapper">
-        SELECT u.*, ui.real_name nickname
+    <sql id="selectFiled">
+        SELECT
+            u.user_id uid, u.student_number, u.`password`,
+            u.avatar, u.email, u.user_right, u.user_status,
+            ui.user_info_id uiid, ui.real_name, ui.birthday,
+            ui.college, ui.development_direction, ui.dormitory_number,
+            ui.enrollment_year, ui.github_id, ui.graduation_time,
+            ui.join_ailab_time, ui.major, ui.native_place
         FROM `user` u LEFT JOIN user_info ui ON u.user_id = ui.user_id
+    </sql>
+
+    <select id="selectByStuNumAndPwd" resultMap="userMapper">
+        <include refid="selectFiled"></include>
         WHERE u.student_number = #{studentNumber}
         AND u.`password` = #{password}
     </select>
