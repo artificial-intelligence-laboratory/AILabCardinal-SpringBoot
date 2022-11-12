@@ -27,10 +27,18 @@ public class R<T> {
         return r;
     }
 
+    public static <T> R<T> success() {
+        return success(null);
+    }
+
     public static <T> R<T> error(String msg) {
+        return error(0, msg);
+    }
+
+    public static <T> R<T> error(int code, String msg) {
         R r = new R();
         r.msg = msg;
-        r.code = 0;
+        r.code = code;
         return r;
     }
 

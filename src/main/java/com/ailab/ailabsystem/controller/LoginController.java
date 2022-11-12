@@ -1,59 +1,57 @@
 package com.ailab.ailabsystem.controller;
 
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.model.entity.User;
-import com.ailab.ailabsystem.service.LoginService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.extern.slf4j.Slf4j;
+import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.model.dto.LoginRequest;
+import com.ailab.ailabsystem.service.UserService;
+import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
-@Slf4j
+@Api(value = "登录服务接口", tags = "登录服务接口")
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/passport")
 public class LoginController {
 
     @Autowired
-    private LoginService loginService;
+    private UserService userService;
+
+    @Autowired
+    private RedisOperator redis;
 
     /**
      * 用户登陆
-     * @param request 用于登陆成功后将用户数据存到session中
-     * @param user
+     * @param loginRequest      登录请求参数
      * @return
      */
+    @ApiOperation(value = "登录", notes = "账号密码登录，返回token和用户信息，" +
+            "<br>前端保存到cookie或localstorage中，" +
+            "<br>请求其他接口时在Authorization请求头中携带token发送请求，没有token会判断为未登录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "studentNumber", value = "学号", dataType = "String", required = true, paramType = "body"),
+            @ApiImplicitParam(name = "password", value = "密码", dataType = "String", required = true, paramType = "body"),
+    })
     @PostMapping("/login")
-    public R<User> userLogin(HttpServletRequest request,@RequestBody User user){
-
-        // 1.将获取到的密码进行MD5加密处理(先写在这里，之后再考虑)
-        String password = user.getPassword();
-//        password = DigestUtils.md5DigestAsHex(password.getBytes());
-
-        //2、根据页面提交的用户名username查询数据库
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUserName,user.getUserName());
-        User userLogin = loginService.getOne(queryWrapper);
-
-        //3、如果没有查询到则返回登录失败结果
-        if(userLogin == null){
-            return R.error("账号不存在");
-        }
-
-        //4、密码比对，如果不一致则返回登录失败结果
-        if(!userLogin.getPassword().equals(password)){
-            return R.error("密码错误，登录失败");
-        }
-
-        //5、查看用户状态，如果为已禁用状态，则返回用户已禁用结果
-        if(userLogin.getUserStatus() == 0){
-            return R.error("账号已禁用");
-        }
-
-        //6、登录成功，将用户id存入Session并返回登录成功结果
-        request.getSession().setAttribute("User",userLogin.getUserId());
-        return R.success(userLogin);
+    public R<Object> userLogin(@RequestBody @Valid LoginRequest loginRequest){
+        return userService.login(loginRequest);
     }
 
+    @ApiOperation(value = "退出登录", notes = "退出登录")
+    @PostMapping("/logout")
+    public R<Object> userLogin(HttpServletRequest request){
+        String token = RequestUtil.getAuthorization(request);
+        redis.del(RedisKey.getLoginUserKey(token));
+        return R.success();
+    }
 }

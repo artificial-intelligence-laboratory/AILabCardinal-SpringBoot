@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ailab.ailabsystem.mapper.UserMapper">
+
+    <resultMap id="userMapper" type="user">
+        <id property="userId" column="user_id"/>
+        <result property="studentNumber" column="student_number"/>
+        <result property="password" column="password"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatar" column="avatar"/>
+        <result property="email" column="email"/>
+        <result property="userRight" column="user_right"/>
+        <result property="lastOnlineIp" column="lastOnlineIp"/>
+        <result property="lastOnlineIpAddress" column="last_online_ip_address"/>
+        <result property="lastOnlineIp" column="last_online_ip"/>
+    </resultMap>
+
+    <select id="selectByStuNumAndPwd" resultMap="userMapper">
+        SELECT u.*, ui.real_name nickname
+        FROM `user` u LEFT JOIN user_info ui ON u.user_id = ui.user_id
+        WHERE u.student_number = #{studentNumber}
+        AND u.`password` = #{password}
+    </select>
+
+
+</mapper>

@@ -1,27 +1,72 @@
 package com.ailab.ailabsystem.model.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @TableName(value = "user")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class User implements Serializable {
-    private int userId;
-    private String userName;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
+
+    @TableId(type = IdType.AUTO)
+    private Long userId;
+
+    /**
+     * 学号
+     */
+    private String studentNumber;
+
+    /**
+     * 密码
+     */
     private String password;
+
+    /**
+     * 电子邮箱
+     */
     private String email;
+
+    /**
+     * 头像
+     */
     private String avatar;
-    private int userRight;
+
+    /**
+     * 用户权限（0为根用户，1为管理员，2为普通用户）
+     */
+    private Integer userRight;
+
+    /**
+     * 最后一次上线时间
+     */
     private LocalDateTime lastOnlineTime;
+
+    /**
+     * 最后一次上线的ip
+     */
     private String lastOnlineIp;
+
+    /**
+     * 最后一次上线的ip
+     */
     private String lastOnlineIpAddress;
-    private int userStatus;
+
+    /**
+     * 状态码（0代表账号被禁用，1代表正常，默认为1）
+     */
+    private Integer userStatus;
+
+    /**
+     * 别名，联查user_info表获得
+     */
+    @TableField(exist = false)
+    private String nickname;
 }
