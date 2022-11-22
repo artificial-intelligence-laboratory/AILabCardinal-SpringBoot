@@ -6,10 +6,15 @@ import cn.hutool.core.util.ObjectUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
 import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.enums.ResponseStatusEnum;
+import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.dto.SingInRequest;
 import com.ailab.ailabsystem.model.entity.InOutRegistration;
 import com.ailab.ailabsystem.model.entity.User;
+import com.ailab.ailabsystem.model.entity.UserInfo;
+import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.ailab.ailabsystem.service.SignInService;
+import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.TimeUtil;
 import com.ailab.ailabsystem.util.UserHolder;
@@ -17,14 +22,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author xiaozhi
@@ -40,8 +45,10 @@ public class UserController {
     private RedisOperator redis;
 
     @Resource
-    private SignInService signInService;
+    private UserService userService;
 
+    @Resource
+    private SignInService signInService;
 
     @ApiOperation(value = "签到接口", notes = "签到接口")
     @ApiImplicitParams({
@@ -51,6 +58,9 @@ public class UserController {
     })
     @PostMapping("/signIn")
     public R singIn(@ApiIgnore @RequestBody SingInRequest singInRequest) {
+        if (ObjectUtil.isNull(singInRequest)) {
+            return R.error("参数异常");
+        }
         // 设置默认值
         String task = ObjectUtil.defaultIfBlank(singInRequest.getTask(), CommonConstant.TASK_DEFAULT_VALUE);
         Integer time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
@@ -83,5 +93,22 @@ public class UserController {
 
         signInService.save(inOutRegistration);
         return R.success();
+    }
+
+    @ApiOperation(value = "获取所有学生信息接口", notes = "获取所有学生信息接口")
+    @GetMapping("/getStuInfoList")
+    public R getStuInfoList() {
+        Map<String, List<UserInfoVo>> userInfos = userService.getUserInfoList();
+        return R.success(userInfos);
+    }
+
+    @ApiOperation(value = "获取单个学生信息", notes = "获取单个学生信息")
+    @GetMapping("/getStuInfo")
+    public R getStuInfo(Integer userInfoId) {
+        if (ObjectUtils.isEmpty(userInfoId)) {
+            throw new CustomException(ResponseStatusEnum.FAILED);
+        }
+        UserInfo userInfo = userService.getUserInfo(userInfoId);
+        return R.success(userInfo);
     }
 }

@@ -1,17 +1,17 @@
 server:
-  port: 8090
+  port: 8888
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://ailab-system-datebase.org:3306/ailabsystem?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/ailabsystem?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
-    password: abc123
+    password: Aliyun@qq.com
 
   redis:
-    host: ailab-system-datebase.org
+    host: localhost
     port: 6379
-    database: 0
-    #    password: 123321
+    database: 12
+    password: redis@xiaozhi.com
     lettuce:
       pool:
         max-active: 10

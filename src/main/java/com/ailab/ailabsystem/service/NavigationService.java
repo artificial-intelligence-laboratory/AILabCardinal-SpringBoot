@@ -6,5 +6,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface NavigationService extends IService<Site> {
 
-    R queryBySiteTypeCode(int siteTypeCode);
+    R queryBySiteTypeCode(Integer siteTypeCode);
 }

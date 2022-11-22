@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.model.dto;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * @create 2022-11-2022/11/12 19:52
  */
 @Data
+@ApiModel
 public class SingInRequest {
 
     /**

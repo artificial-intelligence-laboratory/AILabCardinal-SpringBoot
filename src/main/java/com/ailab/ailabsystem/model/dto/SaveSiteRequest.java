@@ -10,13 +10,17 @@ import javax.validation.constraints.NotBlank;
  * @description
  * @create 2022-11-2022/11/12 0:23
  */
-@ApiModel
 @Data
-public class LoginRequest {
+@ApiModel
+public class SaveSiteRequest {
 
     @NotBlank(message = "学号不能为空")
-    private String studentNumber;
+    private String siteName;
 
-    @NotBlank(message = "密码不能为空")
-    private String password;
+    @NotBlank(message = "url不能为空")
+    private String siteUrl;
+
+    @NotBlank(message = "链接信息")
+    private String siteIntro;
+
 }

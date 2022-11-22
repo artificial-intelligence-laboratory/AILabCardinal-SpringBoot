@@ -18,8 +18,20 @@ public class UserMapperTest {
     private UserMapper userMapper;
 
     @Test
-    public void test(){
+    public void testSelectByStuNumAndPwd(){
         User test = userMapper.selectByStuNumAndPwd("test", "1");
         System.out.println(test);
     }
+
+    @Test
+    public void testInsert(){
+        User user = new User();
+        user.setAvatar("aa");
+        user.setEmail("aaa@qq.com");
+        user.setStudentNumber("aaa");
+        user.setPassword("123");
+        userMapper.insert(user);
+        System.out.println(user.getUserId());
+    }
+
 }

@@ -4,11 +4,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author xiaozhi
+ */
 @TableName(value = "user_info")
 @Data
 public class UserInfo implements Serializable {
@@ -22,7 +26,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户id
      */
-    private Integer userid;
+    private Integer userId;
 
     /**
      * 真实姓名
@@ -32,11 +36,13 @@ public class UserInfo implements Serializable {
     /**
      * 生日
      */
-    private String birthday;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
 
     /**
      * 入学年份
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date enrollmentYear;
 
     /**
@@ -47,7 +53,8 @@ public class UserInfo implements Serializable {
     /**
      * 加入实验室时间
      */
-    private String joinAilabTime;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date joinAilabTime;
 
     /**
      * 开发方向
@@ -75,6 +82,11 @@ public class UserInfo implements Serializable {
     private String githubId;
 
     /**
+     * github url
+     */
+    private String githubUrl;
+
+    /**
      * 宿舍号
      */
     private String dormitoryNumber;
@@ -82,6 +94,7 @@ public class UserInfo implements Serializable {
     /**
      * 毕业时间
      */
-    private String graduationTime;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date graduationTime;
 
 }

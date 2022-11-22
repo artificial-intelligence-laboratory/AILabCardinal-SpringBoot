@@ -21,4 +21,19 @@ public class CommonConstant {
      * 最大签出时间：每天晚上的22点
      */
     public static final Integer MAX_CHECKOUT_TIME = 22;
+
+    /**
+     * 本届学生
+     */
+    public static final String CURRENT_STUDENTS = "currentStudent";
+
+    /**
+     * 往届学生
+     */
+    public static final String PREVIOUS_STUDENTS = "previousStudents";
+
+    /**
+     * 年级前缀
+     */
+    public static final String GRADE_PRE = "20";
 }

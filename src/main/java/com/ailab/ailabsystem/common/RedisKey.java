@@ -22,6 +22,15 @@ public class RedisKey {
      */
     private static final String USER_SIGN_IN = "user:signIn";
 
+    /**
+     * 标签内容
+     */
+    private static final String LABEL_CONTENT = "label:content";
+
+    /**
+     * 用户信息列表key
+     */
+    private static final String USER_INFOS = "user:userInfos";
 
     public static String getLoginUserKey(String token) {
         return LOGIN_USER + SPLIT + token;
@@ -32,5 +41,19 @@ public class RedisKey {
      */
     public static String getUserSignIn(Long userId) {
         return USER_SIGN_IN + SPLIT + userId;
+    }
+
+    /**
+     * 获取标签内容key
+     */
+    public static String getLabelContent(Integer siteTypeCode) {
+        return LABEL_CONTENT + SPLIT + siteTypeCode;
+    }
+
+    /**
+     * 用户信息列表key
+     */
+    public static String getUserInfos() {
+        return USER_INFOS;
     }
 }

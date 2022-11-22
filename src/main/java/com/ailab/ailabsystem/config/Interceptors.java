@@ -21,7 +21,12 @@ public class Interceptors implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor)
-                .addPathPatterns("/user/**", "/passport/**")
-                .excludePathPatterns("/passport/login");
+                .addPathPatterns(
+                        "/user/**",
+                        "/passport/**",
+                        "/navigation/**")
+                .excludePathPatterns(
+                        "/passport/login"
+                );
     }
 }

@@ -10,6 +10,8 @@ public class AilabsystemApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AilabsystemApplication.class, args);
+//        CorsFilter bean = (CorsFilter) run.getBean("corsFilter");
+//        System.out.println(bean);
     }
 
 }
