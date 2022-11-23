@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -27,6 +28,7 @@ public class InOutRegistration implements Serializable {
     /**
      *  签到时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GTM+8")
     private Date signInTime;
 
     /**
@@ -37,7 +39,7 @@ public class InOutRegistration implements Serializable {
     /**
      * 签到者班级
      */
-    private Integer signInUserClass;
+    private String signInUserClass;
 
     /**
      * 学号
@@ -52,6 +54,7 @@ public class InOutRegistration implements Serializable {
     /**
      * 签到时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GTM+8")
     private Date checkOutTime;
 
     /**

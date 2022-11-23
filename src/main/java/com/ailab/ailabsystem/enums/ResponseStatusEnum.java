@@ -16,7 +16,9 @@ public enum ResponseStatusEnum {
     NOT_FOUND_ERROR(40400, false, "请求数据不存在"),
     FORBIDDEN_ERROR(401, false, "该账号已被禁用，请联系管理员"),
     SYSTEM_ERROR(50000, false, "系统内部异常"),
-    OPERATION_ERROR(50001, false, "操作失败");
+    OPERATION_ERROR(50001, false, "操作失败"),
+    SGININ_ERROR(411, false, "您已签到或当前非签到时间"),
+    EXPORE_EXCEL_ERROR(412, false, "文件下载失败，请重试");
 
     // 响应业务状态
     private Integer status;

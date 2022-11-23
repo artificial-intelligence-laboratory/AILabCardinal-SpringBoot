@@ -31,4 +31,9 @@ public class UserServiceTest {
         }
     }
 
+    @Test
+    public void test(){
+
+    }
+
 }

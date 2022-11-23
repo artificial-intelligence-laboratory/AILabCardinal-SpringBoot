@@ -3,6 +3,7 @@ package com.ailab.ailabsystem.controller;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
 import com.ailab.ailabsystem.common.RedisKey;
@@ -19,9 +20,9 @@ import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.TimeUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 /**
  * @author xiaozhi
- * @description
+ * @description 用户服务controller
  * @create 2022-11-2022/11/12 10:35
  */
 @Api(value = "用户服务接口", tags = "用户服务接口")
@@ -50,17 +51,21 @@ public class UserController {
     @Resource
     private SignInService signInService;
 
-    @ApiOperation(value = "签到接口", notes = "签到接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "task", value = "任务", dataType = "String", required = false, paramType = "body"),
-            @ApiImplicitParam(name = "remark", value = "备注", dataType = "String", required = false, paramType = "body"),
-            @ApiImplicitParam(name = "checkOutTime", value = "签出时间", dataType = "int", required = false, paramType = "body"),
-    })
-    @PostMapping("/signIn")
-    public R singIn(@ApiIgnore @RequestBody SingInRequest singInRequest) {
-        if (ObjectUtil.isNull(singInRequest)) {
-            return R.error("参数异常");
+    @ApiOperation(value = "判断是否已经签到接口", notes = "判断是否已经签到接口")
+    @GetMapping("/isSingIn")
+    public R<Object> isSingIn() {
+        User user = UserHolder.getUser();
+        // 判断是否已经签到
+        if (redis.keyIsExist(RedisKey.getUserSignIn(user.getUserId()))) {
+            throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
+        return R.success();
+    }
+
+    @ApiOperation(value = "签到接口", notes = "签到接口")
+    @PostMapping("/signIn")
+    public R<Object> singIn(@ApiIgnore @RequestBody SingInRequest singInRequest) {
+        Assert.notNull(singInRequest, "参数异常");
         // 设置默认值
         String task = ObjectUtil.defaultIfBlank(singInRequest.getTask(), CommonConstant.TASK_DEFAULT_VALUE);
         Integer time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
@@ -71,16 +76,17 @@ public class UserController {
         // 获取当前小时
         int hour = DateUtil.date(currentTime).getField(DateField.HOUR_OF_DAY);
         if (hour < 8 || hour > 22) {
-            return R.error("请在规定时间内签到");
+            throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         User user = UserHolder.getUser();
+        // 判断是否已经签到
         if (redis.keyIsExist(RedisKey.getUserSignIn(user.getUserId()))) {
-            return R.success("您已签到，请勿重复");
+            throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
-        // 签到放入redis中，指定时间后过期
-        redis.set(RedisKey.getUserSignIn(user.getUserId()), "1", time * 60 * 60);
         // 获取签出时间
-        Date checkOutTime = TimeUtil.getAddDate(currentTime, time, CommonConstant.MAX_CHECKOUT_TIME);
+        Date checkOutTime = getCheckOutTime(time, currentTime, CommonConstant.MAX_CHECKOUT_TIME);
+        long addTime = TimeUtil.getAddTime(currentTime, checkOutTime);
+        redis.set(RedisKey.getUserSignIn(user.getUserId()), "1", addTime);
 
         InOutRegistration inOutRegistration = new InOutRegistration();
         inOutRegistration.setTask(task);
@@ -94,6 +100,25 @@ public class UserController {
         signInService.save(inOutRegistration);
         return R.success();
     }
+
+    /**
+     * 获取签出时间
+     * @param time          指定小时签出
+     * @param currentTime   当前签到时间
+     * @param maxHours      最大时间 - 1，比如最大时间为23，那么设置时间为22
+     * @return
+     */
+    private Date getCheckOutTime(Integer time, Date currentTime, Integer maxHours) {
+        // 结束时间加随机时间
+        int endTime = time * CommonConstant.ONE_HOUR + RandomUtil.randomInt(1, 30) * CommonConstant.ONE_SECONDS;
+        // 获取增加后的时间
+        Date date = DateUtils.addSeconds(currentTime, endTime);
+        // 增加后的时间的小时
+        int hours = DateUtil.date(date).getField(DateField.HOUR_OF_DAY);
+        // 签出时间大于最大时间，则设置为最大时间
+        return hours < maxHours && hours > 8 ? date : DateUtils.setHours(new Date(), maxHours);
+    }
+
 
     @ApiOperation(value = "获取所有学生信息接口", notes = "获取所有学生信息接口")
     @GetMapping("/getStuInfoList")

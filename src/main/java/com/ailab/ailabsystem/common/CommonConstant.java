@@ -18,6 +18,16 @@ public class CommonConstant {
     public static final Integer DEFAULT_CHECK_OUT_TIME = 5;
 
     /**
+     * 一个小时
+     */
+    public static final Integer ONE_HOUR = 60 * 60;
+
+    /**
+     * 一分钟
+     */
+    public static final Integer ONE_SECONDS = 60;
+
+    /**
      * 最大签出时间：每天晚上的22点
      */
     public static final Integer MAX_CHECKOUT_TIME = 22;
@@ -36,4 +46,12 @@ public class CommonConstant {
      * 年级前缀
      */
     public static final String GRADE_PRE = "20";
+
+
+    /**
+     * 文件后缀
+     */
+    public static final String EXCEL_SUFFIX = ".xlsx";
+
+
 }

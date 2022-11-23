@@ -8,6 +8,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author 伟峰
+ */
 @TableName(value = "site_type")
 @Data
 public class SiteType implements Serializable {

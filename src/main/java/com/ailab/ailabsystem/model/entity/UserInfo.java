@@ -74,7 +74,7 @@ public class UserInfo implements Serializable {
     /**
      * 班级
      */
-    private Integer classNumber;
+    private String classNumber;
 
     /**
      * github id

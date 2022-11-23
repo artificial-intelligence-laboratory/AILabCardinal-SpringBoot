@@ -36,4 +36,9 @@ public class UserVo implements Serializable {
      */
     private String nickname;
 
+    /**
+     * github url
+     */
+    private String githubUrl;
+
 }

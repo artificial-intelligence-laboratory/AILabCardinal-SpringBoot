@@ -43,7 +43,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 将获取到的密码进行MD5加密处理(先写在这里，之后再考虑)
         String password = loginRequest.getPassword();
         String studentNumber = loginRequest.getStudentNumber();
-//        password = DigestUtils.md5DigestAsHex(password.getBytes());
         User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, password);
         if (ObjectUtil.isNull(userLogin)) {
             throw new CustomException(ResponseStatusEnum.USERNAME_PASSWORD_ERROR);
@@ -56,6 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String token = UUID.randomUUID().toString();
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
+        userVo.setGithubUrl(userLogin.getUserInfo().getGithubUrl());
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
         // 转成json

@@ -199,6 +199,16 @@ public class RedisOperator {
 	}
 
 	/**
+	 * 实现：将一个map存储到hash表中
+	 *
+	 * @param key
+	 * @param map
+	 */
+	public void hset(String key, Map<String, String> map) {
+		redisTemplate.opsForHash().putAll(key, map);
+	}
+
+	/**
 	 * 实现命令：HGET key field，返回哈希表 key中给定域 field的值
 	 * 
 	 * @param key

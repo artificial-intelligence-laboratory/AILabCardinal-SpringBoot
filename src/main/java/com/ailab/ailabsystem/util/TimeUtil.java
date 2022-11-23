@@ -2,8 +2,6 @@ package com.ailab.ailabsystem.util;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.Date;
 
@@ -23,19 +21,16 @@ public class TimeUtil {
         return date.getField(DateField.HOUR_OF_DAY);
     }
 
-
     /**
-     * 获取增加的时间
-     * @param currentTime   当前时间
-     * @param count         添加多少小时
-     * @param maxHour       最大小时
-     * @return 超过最大小时就返回最大小时
+     * 获取前面时间到后面时间之间的秒数
+     *
+     * @param preTime   前面时间
+     * @param afterTime 后面时间
+     * @return 返回秒数
      */
-    public static Date getAddDate(Date currentTime, Integer count, Integer maxHour) {
-        // 获取增加后的时间
-        Date date = DateUtils.addHours(currentTime, count);
-        // 增加后的时间的小时
-        int hours = DateUtil.date(date).getField(DateField.HOUR_OF_DAY);
-        return hours < maxHour ? date : DateUtils.addHours(currentTime, maxHour - hours - 1);
+    public static long getAddTime(Date preTime, Date afterTime) {
+        long time = afterTime.getTime() - preTime.getTime();
+        return time / 1000;
     }
+
 }

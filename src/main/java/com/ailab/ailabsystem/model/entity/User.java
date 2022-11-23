@@ -9,6 +9,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * @author xiaozhi
+ */
 @TableName(value = "user")
 @Data
 public class User implements Serializable {
