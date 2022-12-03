@@ -68,7 +68,7 @@ public class UserController {
         Assert.notNull(singInRequest, "参数异常");
         // 设置默认值
         String task = ObjectUtil.defaultIfBlank(singInRequest.getTask(), CommonConstant.TASK_DEFAULT_VALUE);
-        Integer time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
+        Double time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
         String remark = ObjectUtil.defaultIfNull(singInRequest.getRemark(), "");
 
         // 限定签到时间： 8:00 - 22:00
@@ -91,7 +91,7 @@ public class UserController {
         InOutRegistration inOutRegistration = new InOutRegistration();
         inOutRegistration.setTask(task);
         inOutRegistration.setRemark(remark);
-        inOutRegistration.setSignInTime(new Date());
+        inOutRegistration.setSignInTime(currentTime);
         inOutRegistration.setCheckOutTime(checkOutTime);
         inOutRegistration.setStudentNumber(user.getStudentNumber());
         inOutRegistration.setSignInUserClass(user.getUserInfo().getClassNumber());
@@ -106,17 +106,19 @@ public class UserController {
      * @param time          指定小时签出
      * @param currentTime   当前签到时间
      * @param maxHours      最大时间 - 1，比如最大时间为23，那么设置时间为22
-     * @return
+     * @return 签到时间
      */
-    private Date getCheckOutTime(Integer time, Date currentTime, Integer maxHours) {
+    private Date getCheckOutTime(Double time, Date currentTime, Integer maxHours) {
+        // 获取随机半小时的时间 - 毫秒数
+        long halfHour = DateUtils.MILLIS_PER_MINUTE * 30;
         // 结束时间加随机时间
-        int endTime = time * CommonConstant.ONE_HOUR + RandomUtil.randomInt(1, 30) * CommonConstant.ONE_SECONDS;
-        // 获取增加后的时间
-        Date date = DateUtils.addSeconds(currentTime, endTime);
-        // 增加后的时间的小时
-        int hours = DateUtil.date(date).getField(DateField.HOUR_OF_DAY);
+        long addTime =  (RandomUtil.randomLong(-halfHour, halfHour) + (long)(time * DateUtils.MILLIS_PER_HOUR));
+        // 获取签出时间
+        Date checkOutTime = DateUtils.addMilliseconds(currentTime, (int) addTime);
+        // 获取签到时间是几点
+        int hours = DateUtil.date(checkOutTime).getField(DateField.HOUR_OF_DAY);
         // 签出时间大于最大时间，则设置为最大时间
-        return hours < maxHours && hours > 8 ? date : DateUtils.setHours(new Date(), maxHours);
+        return hours < maxHours && hours > 8 ? checkOutTime : DateUtils.setHours(currentTime, maxHours);
     }
 
 

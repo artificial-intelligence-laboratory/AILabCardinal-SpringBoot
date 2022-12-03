@@ -4,6 +4,8 @@ import com.ailab.ailabsystem.model.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserMapper extends BaseMapper<User> {
 
@@ -15,4 +17,9 @@ public interface UserMapper extends BaseMapper<User> {
      */
     User selectByStuNumAndPwd(String studentNumber, String password);
 
+    /**
+     * 获取所有未毕业的学员
+     * @return
+     */
+    List<User> selectAllNotGraduatedUser();
 }

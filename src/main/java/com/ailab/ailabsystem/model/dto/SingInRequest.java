@@ -4,9 +4,9 @@ import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
+ * 签到接口参数封装类
+ *
  * @author xiaozhi
- * @description
- * @create 2022-11-2022/11/12 19:52
  */
 @Data
 @ApiModel
@@ -25,5 +25,5 @@ public class SingInRequest {
     /**
      * 签出时间
      */
-    private Integer checkOutTime;
+    private Double checkOutTime;
 }
