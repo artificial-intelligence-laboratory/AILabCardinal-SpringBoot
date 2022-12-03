@@ -1,14 +1,12 @@
 package com.ailab.ailabsystem.util;
 
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.vo.InOutRegistrationVo;
 import org.apache.commons.lang3.time.DateUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 生成时间工具类
@@ -78,6 +76,7 @@ public class GenerateTimeUtil {
         CHECK_OUT_TIME_LIST.add(NIGHT_END_TIME);
     }
 
+
     /**
      * 获取时间每一天的三个不同时间段随机签到和签退的列表
      * @param startTime 开始时间
@@ -86,8 +85,9 @@ public class GenerateTimeUtil {
      * @return 签到签出时间和工作内容的列表
      */
     public static List<InOutRegistrationVo> getDateList(Date startTime,
-                                            Date endTime,
-                                            Integer num) {
+                                                        Date endTime,
+                                                        Integer num,
+                                                        List<User> users) {
         List<InOutRegistrationVo> dateList = new ArrayList<>();
         // 获取到开始天结束天的天数
         long totalDays = DateUtil.betweenDay(startTime, endTime, true);
@@ -95,9 +95,18 @@ public class GenerateTimeUtil {
             // 天数随遍历次数增加
             Date currentTime = DateUtils.addDays(startTime, i);
             // 获取随机的三个时间段的签到时间和签出时间和工作
-            List<InOutRegistrationVo> dates = getThreeTimePeriodsAndWork(currentTime, num);
+            List<InOutRegistrationVo> dates = getThreeTimePeriodsAndWork(currentTime, num, users);
             dateList.addAll(dates);
         }
+        // 根据时间排序
+        dateList.sort((o1, o2) -> {
+            Date signInTime1 = o1.getSignInTime();
+            Date signInTime2 = o2.getSignInTime();
+            if (signInTime1.after(signInTime2)) {
+                return 1;
+            }
+            return -1;
+        });
         return dateList;
     }
 
@@ -108,21 +117,31 @@ public class GenerateTimeUtil {
      * @return
      */
     private static List<InOutRegistrationVo> getThreeTimePeriodsAndWork(Date currentTime,
-                                                            Integer num) {
+                                                                        Integer num,
+                                                                        List<User> users) {
         List<InOutRegistrationVo> clockIns = new ArrayList<>(num * SIGN_START_LIST.size());
         // 获取不同的时间段
         for (int i = 0; i < SIGN_START_LIST.size(); i++) {
-            // 根据人数遍历
+            // 去重集合，最后剩一个人也不重要，重要的是不能重复
+            Set<User> userSet = new HashSet<>(num);
             for (int j = 0; j < num; j++) {
-                InOutRegistrationVo inOutRegistrationVo = getClockIn(currentTime, i);
+                int index = RandomUtil.randomInt(num);
+                // 获取 num 不重复的用户
+                userSet.add(users.get(index));
+            }
+            // 根据人数遍历
+            for (User user : userSet) {
+                InOutRegistrationVo inOutRegistrationVo = getClockIn(currentTime, i, user);
                 clockIns.add(inOutRegistrationVo);
             }
+
         }
         return clockIns;
     }
 
     private static InOutRegistrationVo getClockIn(Date current,
-                                                  int index) {
+                                                  int index,
+                                                  User user) {
         // 根据索引获取签到时间和签出时间
         Long signStartTime = SIGN_START_LIST.get(index);
         Long signEndTime = CHECK_OUT_TIME_LIST.get(index);
@@ -135,17 +154,21 @@ public class GenerateTimeUtil {
         Date checkOutTime = DateUtils.addMilliseconds(current, (int) randomHalfAnHourForCheckOut);
         // 获取指定时间内上下浮动的签出时间
         InOutRegistrationVo clockIn = new InOutRegistrationVo();
+        clockIn.setSignInUserRealName(user.getUserInfo().getRealName());
+        clockIn.setSignInUserClass(user.getUserInfo().getClassNumber());
+        clockIn.setStudentNumber(user.getStudentNumber());
         clockIn.setSignInTime(signTime);
         clockIn.setCheckOutTime(checkOutTime);
         clockIn.setTask(WORDS.get(RandomUtil.randomInt(WORDS.size())));
+
         return clockIn;
     }
 
     public static void main(String[] args) {
-        DateTime startTime = DateUtil.parse("2022-5-14", "yyyy-MM-dd");
-        DateTime endTime = DateUtil.parse("2022-5-18", "yyyy-MM-dd");
-        List<InOutRegistrationVo> dateList = GenerateTimeUtil.getDateList(startTime, endTime, 5);
-        dateList.forEach(System.out::println);
-        System.out.println(dateList.size());
+//        DateTime startTime = DateUtil.parse("2022-5-14", "yyyy-MM-dd");
+//        DateTime endTime = DateUtil.parse("2022-5-18", "yyyy-MM-dd");
+//        List<InOutRegistrationVo> dateList = GenerateTimeUtil.getDateList(startTime, endTime, 5);
+//        dateList.forEach(System.out::println);
+//        System.out.println(dateList.size());
     }
 }

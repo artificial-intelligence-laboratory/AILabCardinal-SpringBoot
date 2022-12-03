@@ -18,7 +18,8 @@ public enum ResponseStatusEnum {
     SYSTEM_ERROR(50000, false, "系统内部异常"),
     OPERATION_ERROR(50001, false, "操作失败"),
     SGININ_ERROR(411, false, "您已签到或当前非签到时间"),
-    EXPORE_EXCEL_ERROR(412, false, "文件下载失败，请重试");
+    EXPORE_EXCEL_ERROR(412, false, "文件下载失败，请重试"),
+    NUM_ERROR(413, false, "最大人数已经超过存在人数");
 
     // 响应业务状态
     private Integer status;

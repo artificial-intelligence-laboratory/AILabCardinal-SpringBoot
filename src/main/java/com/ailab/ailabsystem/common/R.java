@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.common;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
  * 通用返回结果，服务端响应的数据最终都会封装成此对象
  * @param <T>
  */
+@ApiModel("结果返回类")
 @Data
 public class R<T> {
 
