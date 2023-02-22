@@ -84,6 +84,7 @@ public class UserInfo implements Serializable {
     /**
      * github url
      */
+    //todo:GitHub url 进行删除
     private String githubUrl;
 
     /**
@@ -94,6 +95,7 @@ public class UserInfo implements Serializable {
     /**
      * 毕业时间
      */
+    //todo:毕业时间 进行删除
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date graduationTime;
 
