@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
-* @author Y
+* @author huiyuan
 * @description 针对表【project_member】的数据库操作Service实现
 * @createDate 2023-02-23 17:40:41
 */
