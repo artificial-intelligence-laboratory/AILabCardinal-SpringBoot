@@ -43,7 +43,7 @@ public class User implements Serializable {
     private String avatar;
 
     /**
-     * 用户权限（0为根用户，1为管理员，2为普通用户）
+     * 用户权限（0代表管理员，1代表老师，2代表实验室负责人，3代表实验室成员，4代表非实验室成员）
      */
     private Integer userRight;
 

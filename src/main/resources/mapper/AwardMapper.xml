@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ailab.ailabsystem.mapper.AwardMapper">
+
+    <resultMap id="BaseResultMap" type="com.ailab.ailabsystem.model.entity.Award">
+            <id property="awardId" column="award_id" jdbcType="INTEGER"/>
+            <result property="competitionId" column="competition_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="awardLevel" column="award_level" jdbcType="TINYINT"/>
+            <result property="awardTime" column="award_time" jdbcType="DATE"/>
+            <result property="role" column="role" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        award_id,competition_id,user_id,
+        award_level,award_time,role
+    </sql>
+</mapper>

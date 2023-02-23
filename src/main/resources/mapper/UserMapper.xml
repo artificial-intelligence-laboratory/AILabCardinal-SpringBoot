@@ -24,10 +24,8 @@
             <result property="dormitoryNumber" column="dormitory_number"/>
             <result property="enrollmentYear" column="enrollment_year"/>
             <result property="githubId" column="github_id"/>
-            <result property="graduationTime" column="graduation_time"/>
             <result property="joinAilabTime" column="join_ailab_time"/>
             <result property="githubId" column="github_id"/>
-            <result property="githubUrl" column="github_url"/>
             <result property="major" column="major"/>
             <result property="classNumber" column="class_number"/>
             <result property="nativePlace" column="native_place"/>
@@ -35,14 +33,27 @@
     </resultMap>
 
     <sql id="selectFiled">
-        SELECT
-            u.user_id uid, u.student_number, u.`password`,
-            u.avatar, u.email, u.user_right, u.user_status,
-            ui.user_info_id uiid, ui.real_name, ui.birthday, ui.class_number,
-            ui.college, ui.development_direction, ui.dormitory_number,
-            ui.enrollment_year, ui.github_id, ui.github_url,ui.graduation_time,
-            ui.join_ailab_time, ui.major, ui.native_place
-        FROM `user` u LEFT JOIN user_info ui ON u.user_id = ui.user_id
+        SELECT u.user_id       uid,
+               u.student_number,
+               u.`password`,
+               u.avatar,
+               u.email,
+               u.user_right,
+               u.user_status,
+               ui.user_info_id uiid,
+               ui.real_name,
+               ui.birthday,
+               ui.class_number,
+               ui.college,
+               ui.development_direction,
+               ui.dormitory_number,
+               ui.enrollment_year,
+               ui.github_id,
+               ui.join_ailab_time,
+               ui.major,
+               ui.native_place
+        FROM `user` u
+                 LEFT JOIN user_info ui ON u.user_id = ui.user_id
     </sql>
 
     <select id="selectByStuNumAndPwd" resultMap="userMapper">

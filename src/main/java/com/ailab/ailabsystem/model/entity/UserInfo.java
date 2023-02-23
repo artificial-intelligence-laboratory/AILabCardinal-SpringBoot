@@ -82,21 +82,8 @@ public class UserInfo implements Serializable {
     private String githubId;
 
     /**
-     * github url
-     */
-    //todo:GitHub url 进行删除
-    private String githubUrl;
-
-    /**
      * 宿舍号
      */
     private String dormitoryNumber;
-
-    /**
-     * 毕业时间
-     */
-    //todo:毕业时间 进行删除
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date graduationTime;
 
 }
