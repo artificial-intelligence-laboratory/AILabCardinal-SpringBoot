@@ -20,7 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
-public class Swagger2 {
+public class SwaggerConfig {
 
     //    http://localhost:8080/swagger-ui.html     原路径
     //    http://localhost:8080/doc.html            新路径
@@ -32,7 +32,7 @@ public class Swagger2 {
     @Bean
     public Docket createRestApi() {
 
-        return new Docket(DocumentationType.SWAGGER_2)  // 指定api类型为swagger2
+        return new Docket(DocumentationType.OAS_30)  // 指定api类型为swagger2
                 .apiInfo(apiInfo())                 // 用于定义api文档汇总信息
                 // 是否开启，生成环境关闭
                 .enable(enableSwagger)

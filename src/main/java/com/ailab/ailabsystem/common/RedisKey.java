@@ -32,6 +32,11 @@ public class RedisKey {
      */
     private static final String USER_INFOS = "user:userInfos";
 
+    /**
+     * 用户的首页信息key
+     */
+    public static final String INDEX_USER_INFO = "user:indexInfo";
+
     public static String getLoginUserKey(String token) {
         return LOGIN_USER + SPLIT + token;
     }
@@ -55,5 +60,13 @@ public class RedisKey {
      */
     public static String getUserInfos() {
         return USER_INFOS;
+    }
+
+    /**
+     * 用户首页信息
+     * @return
+     */
+    public static String getIndexUser(Long userId) {
+        return INDEX_USER_INFO + SPLIT + userId;
     }
 }

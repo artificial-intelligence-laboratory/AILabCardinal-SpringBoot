@@ -2,6 +2,7 @@ package com.ailab.ailabsystem.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
@@ -9,11 +10,10 @@ import com.ailab.ailabsystem.common.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserStatus;
 import com.ailab.ailabsystem.exception.CustomException;
-import com.ailab.ailabsystem.mapper.UserInfoMapper;
-import com.ailab.ailabsystem.mapper.UserMapper;
+import com.ailab.ailabsystem.mapper.*;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
-import com.ailab.ailabsystem.model.entity.User;
-import com.ailab.ailabsystem.model.entity.UserInfo;
+import com.ailab.ailabsystem.model.entity.*;
+import com.ailab.ailabsystem.model.vo.IndexUserVo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
@@ -36,6 +36,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserInfoMapper userInfoMapper;
 
     @Resource
+    private ProjectMemberMapper projectMemberMapper;
+
+    @Resource
+    private CompetitionSituationMapper competitionSituationMapper;
+
+    @Resource
+    private AwardMapper awardMapper;
+
+    @Resource
     private RedisOperator redis;
 
     @Override
@@ -55,7 +64,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String token = UUID.randomUUID().toString();
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
-        userVo.setGithubUrl(userLogin.getUserInfo().getGithubUrl());
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
         // 转成json
@@ -95,15 +103,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userInfoVo.setGrade(CommonConstant.GRADE_PRE + grade + "级");
             // 获取当前时间
             Date today = new Date();
-            // 获取学生毕业时间
-            Date graduationTime = userInfo.getGraduationTime();
-            // 毕业时间在当前时间的后面为本届，其余为往届
-            if (graduationTime.after(today)) {
-                // 本届学生
-                currentStudents.add(userInfoVo);
-            } else {
-                previousStudents.add(userInfoVo);
-            }
         });
         map.put(CommonConstant.CURRENT_STUDENTS, currentStudents);
         map.put(CommonConstant.PREVIOUS_STUDENTS, previousStudents);
@@ -118,5 +117,72 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         wrapper.eq("user_info_id", userInfoId);
         UserInfo userInfo = userInfoMapper.selectOne(wrapper);
         return userInfo;
+    }
+
+    @Override
+    public R getIndexUserInfo(String loginUserKey) {
+        //从redis取出User的信息
+        String userJson = redis.get(loginUserKey);
+        User user = BeanUtil.copyProperties(userJson, User.class);
+        Long userId = user.getUserId();
+        //先查redis的首页用户
+        String indexUserKey = RedisKey.getIndexUser(userId);
+        String resultUserJson = redis.get(indexUserKey);
+        if (StrUtil.isNotBlank(resultUserJson)) {
+            return R.success(BeanUtil.copyProperties(resultUserJson, IndexUserVo.class));
+        }
+        IndexUserVo indexUserVo = new IndexUserVo();
+        //1.获取字符串形式用户权限名
+        indexUserVo.setRoleName(getUserRightName(user.getUserRight()));
+        //2.查询用户项目数量
+        QueryWrapper<ProjectMember> projectMemberQueryWrapper = new QueryWrapper();
+        projectMemberQueryWrapper.eq("user_id", userId);
+        Integer projectCount = projectMemberMapper.selectCount(projectMemberQueryWrapper);
+        //3.查询用户正在比赛数量
+        int competitionCount = competitionSituationMapper.queryCompetitionCount(userId);
+        //4.查询用户奖项数量
+        QueryWrapper<Award> awardQueryWrapper = new QueryWrapper<>();
+        awardQueryWrapper.eq("user_id", userId);
+        Integer awardCount = awardMapper.selectCount(awardQueryWrapper);
+        //todo 查询用户专利数量
+
+        //给indexUserVo属性赋值
+        indexUserVo.setProjectCount(projectCount);
+        indexUserVo.setCompetitionCount(competitionCount);
+        indexUserVo.setAwardCount(awardCount);
+        indexUserVo.setUserId(userId);
+
+        String indexUserJson = JSONUtil.toJsonStr(indexUserVo);
+        redis.set(indexUserKey, indexUserJson);
+        return R.success(indexUserVo);
+    }
+
+    @Override
+    public String getUserRightName(Integer userRight) {
+        if (userRight == null) {
+            throw new CustomException(ResponseStatusEnum.NOT_FOUND_ERROR);
+        }
+        String rightName = "";
+        switch (userRight) {
+            case 0:
+                rightName = "管理员";
+                break;
+            case 1:
+                rightName = "老师";
+                break;
+            case 2:
+                rightName = "实验室负责人";
+                break;
+            case 3:
+                rightName = "实验室成员";
+                break;
+            case 4:
+                rightName = "实验室合作伙伴";
+                break;
+            case 5:
+                rightName = "非实验室成员";
+                break;
+        }
+        return rightName;
     }
 }

@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -17,6 +18,7 @@ import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.ailab.ailabsystem.service.SignInService;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.TimeUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import io.swagger.annotations.Api;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -137,5 +140,14 @@ public class UserController {
         }
         UserInfo userInfo = userService.getUserInfo(userInfoId);
         return R.success(userInfo);
+    }
+
+    @ApiOperation(value = "获取首页的学生信息", notes = "获取首页的学生信息")
+    @GetMapping("/getIndexUserInfo")
+    public R getIndexUserInfo(HttpServletRequest request) {
+        //获取用户登录凭证token
+        String token = RequestUtil.getAuthorization(request);
+        String loginUserKey = RedisKey.getLoginUserKey(token);
+        return userService.getIndexUserInfo(loginUserKey);
     }
 }

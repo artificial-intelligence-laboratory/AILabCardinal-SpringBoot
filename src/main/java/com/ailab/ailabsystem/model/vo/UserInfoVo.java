@@ -32,11 +32,6 @@ public class UserInfoVo implements Serializable {
     private Integer classNumber;
 
     /**
-     * github url
-     */
-    private String githubUrl;
-
-    /**
      * 年级
      */
     private String grade;

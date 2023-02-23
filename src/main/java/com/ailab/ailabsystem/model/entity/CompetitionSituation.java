@@ -9,32 +9,27 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author huiyuan
- * @TableName competition 比赛表
+ * 
+ * @TableName competition_situation
  */
-@TableName(value ="competition")
+@TableName(value ="competition_situation")
 @Data
-public class Competition implements Serializable {
+public class CompetitionSituation implements Serializable {
+    /**
+     * 比赛参加情况id
+     */
+    @TableId(type = IdType.AUTO)
+    private Integer competitionSituationId;
+
     /**
      * 比赛id
      */
-    @TableId(type = IdType.AUTO)
     private Integer competitionId;
 
     /**
-     * 比赛名
+     * 用户id
      */
-    private String competitionName;
-
-    /**
-     * 年度
-     */
-    private String year;
-
-    /**
-     * 比赛状态（0代表正在参赛、1代表已经结束）
-     */
-    private Integer competitionStatus;
+    private Integer userId;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

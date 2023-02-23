@@ -5,12 +5,16 @@
 <mapper namespace="com.ailab.ailabsystem.mapper.CompetitionMapper">
 
     <resultMap id="BaseResultMap" type="com.ailab.ailabsystem.model.entity.Competition">
-            <id property="competitionId" column="competition_id" jdbcType="INTEGER"/>
-            <result property="competitionName" column="competition_name" jdbcType="VARCHAR"/>
-            <result property="year" column="year" jdbcType="VARCHAR"/>
+        <id property="competitionId" column="competition_id" jdbcType="INTEGER"/>
+        <result property="competitionName" column="competition_name" jdbcType="VARCHAR"/>
+        <result property="year" column="year" jdbcType="VARCHAR"/>
+        <result property="competitionStatus" column="competition_status" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        competition_id,competition_name,year
+        competition_id
+        ,competition_name
+        ,year
+        ,competition_status
     </sql>
 </mapper>

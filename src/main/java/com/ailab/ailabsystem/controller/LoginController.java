@@ -41,7 +41,7 @@ public class LoginController {
             "<br>前端保存到cookie或localstorage中，" +
             "<br>请求其他接口时在Authorization请求头中携带token发送请求，没有token会判断为未登录")
     @PostMapping("/login")
-    public R<Object> userLogin(@ApiIgnore @RequestBody @Valid LoginRequest loginRequest){
+    public R<Object> userLogin(@RequestBody LoginRequest loginRequest){
         return userService.login(loginRequest);
     }
 
