@@ -205,16 +205,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //查redis看是否存在userInfoVo信息
         String userInfoKey = RedisKey.getUserInfo(userId);
         String userInfoJson = redis.get(userInfoKey);
-        UserInfo userInfo = JSONUtil.toBean(userInfoJson, UserInfo.class);
-        //不存在userInfo信息则查数据库
+        UserInfo userInfo = new UserInfo();
+        UserInfoVo userInfoVo = new UserInfoVo();
+        //不存在则查询数据库
         if (StrUtil.isBlank(userInfoJson)) {
-            //注意，这里查的是原始的userInfo，并非响应给前端的userInfoVo
+            //注意，这里查询的是原始的userInfo，并非响应给前端的userInfoVo
             userInfo = getUserInfoByUserId(userId);
+            //利用userInfo转化为userInfoVo信息
+            userInfoVo = getUserInfoVo(userInfo);
+            String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
+            redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
         }
-        //利用userInfo转化为userInfoVo信息
-        UserInfoVo userInfoVo = getUserInfoVo(userInfo);
-        String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
-        redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
+        //存在则直接把JSON转化为实体类
+        userInfoVo = JSONUtil.toBean(userInfoJson, UserInfoVo.class);
         //获取与用户相关的项目
         String userProjectKey = RedisKey.getUserProject(userId);
         String userProjectJson = redis.get(userProjectKey);
