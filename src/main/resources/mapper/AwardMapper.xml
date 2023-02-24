@@ -17,4 +17,9 @@
         award_id,competition_id,user_id,
         award_level,award_time,role
     </sql>
+    <select id="getLabAwardCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT competition_id) FROM award
+        WHERE user_id IN
+        (SELECT user_id FROM `user` where user_right = 2 or user_right = 3)
+    </select>
 </mapper>

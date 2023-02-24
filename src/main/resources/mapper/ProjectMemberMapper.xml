@@ -15,4 +15,10 @@
         project_user_id,project_id,user_id,
         role
     </sql>
+
+    <select id="getLabProjectCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT project_id) FROM project_member
+        WHERE user_id IN
+        (SELECT user_id FROM `user` where user_right = 2 or user_right = 3)
+    </select>
 </mapper>

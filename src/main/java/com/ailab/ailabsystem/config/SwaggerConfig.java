@@ -10,7 +10,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 
 /**
@@ -19,7 +19,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @create 2022-10-2022/10/12 15:02
  */
 @Configuration
-@EnableSwagger2
+@EnableSwagger2WebMvc
 public class SwaggerConfig {
 
     //    http://localhost:8080/swagger-ui.html     原路径
@@ -32,7 +32,7 @@ public class SwaggerConfig {
     @Bean
     public Docket createRestApi() {
 
-        return new Docket(DocumentationType.OAS_30)  // 指定api类型为swagger2
+        return new Docket(DocumentationType.SWAGGER_2)  // 指定api类型为swagger2
                 .apiInfo(apiInfo())                 // 用于定义api文档汇总信息
                 // 是否开启，生成环境关闭
                 .enable(enableSwagger)

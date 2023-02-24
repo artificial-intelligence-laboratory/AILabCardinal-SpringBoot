@@ -37,6 +37,11 @@ public class RedisKey {
      */
     public static final String INDEX_USER_INFO = "user:indexInfo";
 
+    /**
+     *实验室信息区key
+     */
+    public static final String INDEX_LAB_KEY = "lab:index:info";
+
     public static String getLoginUserKey(String token) {
         return LOGIN_USER + SPLIT + token;
     }

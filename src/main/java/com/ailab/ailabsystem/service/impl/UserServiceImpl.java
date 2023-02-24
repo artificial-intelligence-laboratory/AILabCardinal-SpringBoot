@@ -123,39 +123,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public R getIndexUserInfo(String loginUserKey) {
         //从redis取出User的信息
         String userJson = redis.get(loginUserKey);
-        User user = BeanUtil.copyProperties(userJson, User.class);
+        User user = JSONUtil.toBean(userJson, User.class);
         Long userId = user.getUserId();
+
+        //注意上面查的是登录用户的信息（User），而下面查的是用户的首页信息（IndexUserInfo）
         //先查redis的首页用户
         String indexUserKey = RedisKey.getIndexUser(userId);
         String resultUserJson = redis.get(indexUserKey);
         if (StrUtil.isNotBlank(resultUserJson)) {
-            return R.success(BeanUtil.copyProperties(resultUserJson, IndexUserVo.class));
+            return R.success(JSONUtil.toBean(resultUserJson, IndexUserVo.class));
         }
-        IndexUserVo indexUserVo = new IndexUserVo();
-        //1.获取字符串形式用户权限名
-        indexUserVo.setRoleName(getUserRightName(user.getUserRight()));
-        //2.查询用户项目数量
-        QueryWrapper<ProjectMember> projectMemberQueryWrapper = new QueryWrapper();
-        projectMemberQueryWrapper.eq("user_id", userId);
-        Integer projectCount = projectMemberMapper.selectCount(projectMemberQueryWrapper);
-        //3.查询用户正在比赛数量
-        int competitionCount = competitionSituationMapper.queryCompetitionCount(userId);
-        //4.查询用户奖项数量
-        QueryWrapper<Award> awardQueryWrapper = new QueryWrapper<>();
-        awardQueryWrapper.eq("user_id", userId);
-        Integer awardCount = awardMapper.selectCount(awardQueryWrapper);
-        //todo 查询用户专利数量
-
-        //给indexUserVo属性赋值
-        indexUserVo.setProjectCount(projectCount);
-        indexUserVo.setCompetitionCount(competitionCount);
-        indexUserVo.setAwardCount(awardCount);
-        indexUserVo.setUserId(userId);
+        IndexUserVo indexUserVo = setIndexUserVoParams(user);
 
         String indexUserJson = JSONUtil.toJsonStr(indexUserVo);
-        redis.set(indexUserKey, indexUserJson);
+        redis.set(indexUserKey, indexUserJson, 60 * 60);
         return R.success(indexUserVo);
     }
+
 
     @Override
     public String getUserRightName(Integer userRight) {
@@ -184,5 +168,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 break;
         }
         return rightName;
+    }
+
+    /**
+     * 封装了设置首页用户信息IndexUserVo的代码
+     * @param user
+     * @return IndexUserVo
+     */
+    private IndexUserVo setIndexUserVoParams(User user) {
+        Long userId = user.getUserId();
+        IndexUserVo indexUserVo = new IndexUserVo();
+        //1.获取字符串形式用户权限名
+        indexUserVo.setRoleName(getUserRightName(user.getUserRight()));
+        //2.查询用户项目数量
+        QueryWrapper<ProjectMember> projectMemberQueryWrapper = new QueryWrapper();
+        projectMemberQueryWrapper.eq("user_id", userId);
+        Integer projectCount = projectMemberMapper.selectCount(projectMemberQueryWrapper);
+        //3.查询用户正在比赛数量
+        int competitionCount = competitionSituationMapper.queryCompetitionCount(userId);
+        //4.查询用户奖项数量
+        QueryWrapper<Award> awardQueryWrapper = new QueryWrapper<>();
+        awardQueryWrapper.eq("user_id", userId);
+        Integer awardCount = awardMapper.selectCount(awardQueryWrapper);
+        //todo 查询用户专利数量
+
+        //给indexUserVo属性赋值
+        indexUserVo.setProjectCount(projectCount);
+        indexUserVo.setCompetitionCount(competitionCount);
+        indexUserVo.setAwardCount(awardCount);
+        indexUserVo.setUserId(userId);
+
+        return indexUserVo;
     }
 }

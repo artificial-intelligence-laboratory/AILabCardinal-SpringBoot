@@ -3,4 +3,4 @@
 
 Github：https://github.com/artificial-intelligence-laboratory/AILabCardinal-SpringBoot.git
 
-swagger：http://localhost:8080/swagger-ui/index.html
+swagger：http://localhost:8080/doc.html
