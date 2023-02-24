@@ -33,9 +33,19 @@ public class RedisKey {
     private static final String USER_INFOS = "user:userInfos";
 
     /**
+     * 用户个人信息
+     */
+    private static final String USER_INFO = "user:userInfo";
+
+    /**
      * 用户的首页信息key
      */
     public static final String INDEX_USER_INFO = "user:indexInfo";
+
+    /**
+     * 用户的项目信息key
+     */
+    public static final String USER_PROJECT = "user:project";
 
     /**
      *实验室信息区key
@@ -68,10 +78,25 @@ public class RedisKey {
     }
 
     /**
+     * 用户个人信息
+     */
+    public static String getUserInfo(Long userId) {
+        return USER_INFO + SPLIT + userId;
+    }
+
+    /**
      * 用户首页信息
      * @return
      */
     public static String getIndexUser(Long userId) {
         return INDEX_USER_INFO + SPLIT + userId;
+    }
+
+    /**
+     * 用户的项目信息
+     * @return
+     */
+    public static String getUserProject(Long userId) {
+        return USER_PROJECT + SPLIT + userId;
     }
 }

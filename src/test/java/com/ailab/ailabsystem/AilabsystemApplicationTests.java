@@ -1,16 +1,17 @@
 package com.ailab.ailabsystem;
 
-import com.ailab.ailabsystem.mapper.AwardMapper;
-import com.ailab.ailabsystem.mapper.ProjectMemberMapper;
-import com.ailab.ailabsystem.mapper.SiteMapper;
-import com.ailab.ailabsystem.mapper.UserMapper;
+import com.ailab.ailabsystem.mapper.*;
 import com.ailab.ailabsystem.model.entity.Site;
 import com.ailab.ailabsystem.model.entity.User;
+import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.service.UserService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,9 @@ class AilabsystemApplicationTests {
 
     @Autowired
     private AwardMapper awardMapper;
+
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 
     @Test
     void contextLoads() {
@@ -57,6 +61,18 @@ class AilabsystemApplicationTests {
 //            return user.getUserRight() == 2 || user.getUserRight() == 3;
 //        }).collect(Collectors.toList());
         System.out.println(awardMapper.getLabAwardCount());
+    }
+
+    @Test
+    void timeTest() {
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserInfoId, 1);
+        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
+        Date enrollmentYear = userInfo.getEnrollmentYear();
+        Date date = new Date();
+        long l = date.getTime() - enrollmentYear.getTime();
+        l = l / 1000 / 86400;
+        System.out.println("输出信息" + l);
     }
 
 

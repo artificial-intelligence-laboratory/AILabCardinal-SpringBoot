@@ -36,6 +36,8 @@ public interface UserService extends IService<User> {
      */
     UserInfo getUserInfo(Integer userInfoId);
 
+    UserInfo getUserInfoByUserId(Long userId);
+
     /**
      * 获取首页学生信息
      * @param loginUserKey redis存储用户信息的key
@@ -49,4 +51,6 @@ public interface UserService extends IService<User> {
      * @return
      */
     String getUserRightName(Integer userRight);
+
+    R getInfoOfMe(String loginUserKey);
 }

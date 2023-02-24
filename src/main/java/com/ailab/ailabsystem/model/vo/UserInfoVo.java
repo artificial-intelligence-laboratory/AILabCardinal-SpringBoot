@@ -1,8 +1,11 @@
 package com.ailab.ailabsystem.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author xiaozhi
@@ -14,25 +17,59 @@ public class UserInfoVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 用户信息id √
+     */
     private Long userInfoId;
 
     /**
-     * 真实姓名
+     * 用户id √
+     */
+    private Long userId;
+
+    /**
+     * 真实姓名 √
      */
     private String realName;
 
     /**
-     * 开发方向
+     * 籍贯 √
+     */
+    private String nativePlace;
+
+    /** √
+     * 加入实验室时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date joinAilabTime;
+
+    /**
+     * 开发方向 √
      */
     private String developmentDirection;
 
     /**
-     * 班级
+     * 学院 √
      */
-    private Integer classNumber;
+    private String college;
+
+    /**
+     * 专业班级
+     */
+    private String majorAndClassNumber;
+
+    /**
+     * github id √
+     */
+    private String githubId;
 
     /**
      * 年级
      */
     private String grade;
+
+    /**
+     * 用户内网IP
+     */
+    private List<String> intranetIPs;
 }

@@ -14,14 +14,18 @@ import com.ailab.ailabsystem.mapper.*;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
 import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.IndexUserVo;
+import com.ailab.ailabsystem.model.vo.ProjectVo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.RedisOperator;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -39,10 +43,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private ProjectMemberMapper projectMemberMapper;
 
     @Resource
+    private ProjectMapper projectMapper;
+
+    @Resource
     private CompetitionSituationMapper competitionSituationMapper;
 
     @Resource
     private AwardMapper awardMapper;
+
+    @Resource
+    private IntranetMapper intranetMapper;
 
     @Resource
     private RedisOperator redis;
@@ -57,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new CustomException(ResponseStatusEnum.USERNAME_PASSWORD_ERROR);
         }
         // 查看用户状态，如果为已禁用状态，则返回用户已禁用结果
-        if(userLogin.getUserStatus() == UserStatus.DISABLE.getCode()){
+        if (userLogin.getUserStatus() == UserStatus.DISABLE.getCode()) {
             throw new CustomException(ResponseStatusEnum.FORBIDDEN_ERROR);
         }
         // 登录成功，生成随机token
@@ -120,6 +130,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public UserInfo getUserInfoByUserId(Long userId) {
+        QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId);
+        UserInfo userInfo = userInfoMapper.selectOne(wrapper);
+        return userInfo;
+    }
+
+    @Override
     public R getIndexUserInfo(String loginUserKey) {
         //从redis取出User的信息
         String userJson = redis.get(loginUserKey);
@@ -171,9 +189,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * @param loginUserKey
+     * @return
+     * @author huiyuan
+     */
+    @Override
+    public R getInfoOfMe(String loginUserKey) {
+        //先从redis获取登录用户的信息
+        String userJson = redis.get(loginUserKey);
+        if (StrUtil.isBlank(userJson)) {
+            throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
+        }
+        User user = JSONUtil.toBean(userJson, User.class);
+        Long userId = user.getUserId();
+        //查redis看是否存在userInfoVo信息
+        String userInfoKey = RedisKey.getUserInfo(userId);
+        String userInfoJson = redis.get(userInfoKey);
+        UserInfo userInfo = JSONUtil.toBean(userInfoJson, UserInfo.class);
+        //不存在userInfo信息则查数据库
+        if (StrUtil.isBlank(userInfoJson)) {
+            //注意，这里查的是原始的userInfo，并非响应给前端的userInfoVo
+            userInfo = getUserInfoByUserId(userId);
+        }
+        //利用userInfo转化为userInfoVo信息
+        UserInfoVo userInfoVo = getUserInfoVo(userInfo);
+        String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
+        redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
+        //获取与用户相关的项目
+        String userProjectKey = RedisKey.getUserProject(userId);
+        String userProjectJson = redis.get(userProjectKey);
+        List<ProjectVo> userProjectVos = new ArrayList<>();
+        if (StrUtil.isBlank(userProjectJson)) {
+            userProjectVos = getUserProjectVos(userInfo.getUserId());
+            String userProjectJsonStr = JSONUtil.toJsonStr(userProjectVos);
+            redis.set(userProjectKey, userProjectJsonStr, 60 * 30);
+        }
+        userProjectVos = JSONUtil.toList(userProjectJson, ProjectVo.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("userInfo", userInfoVo);
+        map.put("userProjectVos", userProjectVos);
+
+        return R.success(map);
+    }
+
+    /**
      * 封装了设置首页用户信息IndexUserVo的代码
+     *
      * @param user
      * @return IndexUserVo
+     * @author huiyuan
      */
     private IndexUserVo setIndexUserVoParams(User user) {
         Long userId = user.getUserId();
@@ -199,5 +263,144 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         indexUserVo.setUserId(userId);
 
         return indexUserVo;
+    }
+
+    private UserInfoVo getUserInfoVo(UserInfo userInfo) {
+        UserInfoVo userInfoVo = BeanUtil.copyProperties(userInfo, UserInfoVo.class);
+        //专业班级、年级、内网
+        userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
+        userInfoVo.setGrade(getUserGrade(userInfo.getEnrollmentYear()));
+        userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
+
+        return userInfoVo;
+    }
+
+    /**
+     * 获取用户年级
+     * todo 未完善
+     *
+     * @param enrollmentYear
+     * @return
+     */
+    private String getUserGrade(Date enrollmentYear) {
+        if (enrollmentYear == null) {
+            throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
+        }
+        String grade = "";
+        Date date = new Date();
+        long l = date.getTime() - enrollmentYear.getTime();
+        //计算出现在距离入学时间的天数
+        l = l / 1000 / 86400;
+        long year = l / 365;
+        switch ((int) year) {
+            case 0:
+                grade = "大一";
+                break;
+            case 1:
+                grade = "大二";
+                break;
+            case 2:
+                grade = "大三";
+                break;
+            case 3:
+                grade = "大四";
+                break;
+            default:
+                grade = "往届";
+                break;
+        }
+        return grade;
+    }
+
+    /**
+     * 获取用户的内网IP
+     *
+     * @param userId
+     * @return
+     */
+    private List<String> getUserIntranetIPs(Long userId) {
+        QueryWrapper<Intranet> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        List<Intranet> intranets = intranetMapper.selectList(queryWrapper);
+        List<String> intranetIPs = null;
+        for (Intranet intranet : intranets) {
+            intranetIPs.add(intranet.getIntranetIp());
+        }
+        return intranetIPs;
+    }
+
+    /**
+     * 获取与用户相关的项目信息
+     *
+     * @param userId
+     * @return
+     */
+    private List<ProjectVo> getUserProjectVos(Long userId) {
+        List<Project> userProjects = projectMapper.getUserProject(userId);
+        List<ProjectVo> projectVos = new ArrayList<>();
+        for (int i = 0; i < userProjects.size(); i++) {
+            Project project = userProjects.get(i);
+            ProjectVo projectVo = new ProjectVo();
+            //项目名称
+            projectVo.setProjectName(project.getProjectName());
+            //项目归属年度
+            projectVo.setYear(project.getYear());
+            //项目级别
+            projectVo.setLevel(getProjectLevel(project.getLevel()));
+            //项目状态
+            projectVo.setStatus(getProjectStatus(project.getStatus()));
+            //项目成员角色
+            projectVo.setProjectRole(getProjectRole(project, userId));
+
+            projectVos.add(projectVo);
+        }
+        return projectVos;
+    }
+
+    private String getProjectLevel(Integer level) {
+        String projectLevel = "";
+        switch (level) {
+            case 0:
+                projectLevel = "国家级";
+                break;
+            case 1:
+                projectLevel = "省级";
+                break;
+            case 2:
+                projectLevel = "校级";
+                break;
+        }
+        return projectLevel;
+    }
+
+    private String getProjectStatus(Integer status) {
+        String projectStatus = "";
+        switch (status) {
+            case 0:
+                projectStatus = "正在开发";
+                break;
+            case 1:
+                projectStatus = "已结项";
+                break;
+        }
+        return projectStatus;
+    }
+
+    private String getProjectRole(Project project, Long userId) {
+        QueryWrapper<ProjectMember> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("project_id", project.getProjectId())
+                .eq("user_id", userId);
+        ProjectMember projectMember = projectMemberMapper.selectOne(queryWrapper);
+        Integer role = projectMember.getRole();
+        String projectRole = "";
+        switch (role) {
+            case 0:
+                projectRole = "负责人";
+                break;
+            case 1:
+                projectRole = "普通成员";
+                break;
+        }
+        return projectRole;
     }
 }

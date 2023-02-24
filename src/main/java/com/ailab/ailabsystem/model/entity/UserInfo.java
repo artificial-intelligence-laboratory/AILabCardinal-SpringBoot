@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.model.entity;
 
+import cn.hutool.log.Log;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -26,7 +27,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户id
      */
-    private Integer userId;
+    private Long userId;
 
     /**
      * 真实姓名

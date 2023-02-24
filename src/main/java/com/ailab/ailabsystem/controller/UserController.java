@@ -142,12 +142,20 @@ public class UserController {
         return R.success(userInfo);
     }
 
-    @ApiOperation(value = "获取首页的学生信息", notes = "获取首页的学生信息")
+    @ApiOperation(value = "获取学生的首页信息", notes = "获取学生的首页信息")
     @GetMapping("/getIndexUserInfo")
     public R getIndexUserInfo(HttpServletRequest request) {
         //获取用户登录凭证token
         String token = RequestUtil.getAuthorization(request);
         String loginUserKey = RedisKey.getLoginUserKey(token);
         return userService.getIndexUserInfo(loginUserKey);
+    }
+
+    @ApiOperation(value = "获取个人详情学生信息", notes = "获取个人详情学生信息")
+    @GetMapping("/Info/of/me")
+    public R getInfoOfMe(HttpServletRequest request) {
+        String authorization = RequestUtil.getAuthorization(request);
+        String loginUserKey = RedisKey.getLoginUserKey(authorization);
+        return userService.getInfoOfMe(loginUserKey);
     }
 }
