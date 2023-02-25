@@ -215,9 +215,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userInfoVo = getUserInfoVo(userInfo);
             String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
             redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
+        } else {
+            //存在则直接把JSON转化为实体类
+            userInfoVo = JSONUtil.toBean(userInfoJson, UserInfoVo.class);
         }
-        //存在则直接把JSON转化为实体类
-        userInfoVo = JSONUtil.toBean(userInfoJson, UserInfoVo.class);
         //获取与用户相关的项目
         String userProjectKey = RedisKey.getUserProject(userId);
         String userProjectJson = redis.get(userProjectKey);
@@ -226,8 +227,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userProjectVos = getUserProjectVos(userInfo.getUserId());
             String userProjectJsonStr = JSONUtil.toJsonStr(userProjectVos);
             redis.set(userProjectKey, userProjectJsonStr, 60 * 30);
+        } else {
+            userProjectVos = JSONUtil.toList(userProjectJson, ProjectVo.class);
         }
-        userProjectVos = JSONUtil.toList(userProjectJson, ProjectVo.class);
         Map<String, Object> map = new HashMap<>();
         map.put("userInfo", userInfoVo);
         map.put("userProjectVos", userProjectVos);
