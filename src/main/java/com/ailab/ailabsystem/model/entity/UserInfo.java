@@ -47,6 +47,11 @@ public class UserInfo implements Serializable {
     private Date enrollmentYear;
 
     /**
+     * 用户年级
+     */
+    private String grade;
+
+    /**
      * 籍贯
      */
     private String nativePlace;

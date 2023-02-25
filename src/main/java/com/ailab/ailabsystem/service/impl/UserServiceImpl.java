@@ -1,6 +1,7 @@
 package com.ailab.ailabsystem.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -12,6 +13,7 @@ import com.ailab.ailabsystem.enums.UserStatus;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.mapper.*;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
+import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.IndexUserVo;
 import com.ailab.ailabsystem.model.vo.ProjectVo;
@@ -23,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.swagger.models.auth.In;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import springfox.documentation.spring.web.json.Json;
@@ -30,6 +33,7 @@ import springfox.documentation.spring.web.json.Json;
 import javax.annotation.Resource;
 import java.util.*;
 
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -237,6 +241,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success(map);
     }
 
+    @Override
+    public R updateMyInfo(UserInfoDTO userInfoDTO) {
+        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfo::getUserInfoId, userInfoDTO.getUserInfoId());
+        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
+        log.info("用户生日{}",userInfoDTO.getBirthday());
+        BeanUtil.copyProperties(userInfoDTO, userInfo , CopyOptions.create().setIgnoreNullValue(true));
+        userInfoMapper.updateById(userInfo);
+        log.info("用户信息{}",userInfo);
+        return R.success();
+    }
+
     /**
      * 封装了设置首页用户信息IndexUserVo的代码
      *
@@ -274,16 +290,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserInfoVo userInfoVo = BeanUtil.copyProperties(userInfo, UserInfoVo.class);
         //专业班级、年级、内网
         userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
-        userInfoVo.setGrade(getUserGrade(userInfo.getEnrollmentYear()));
+        //已在user_info表及其实体类增加grade字段
+//        userInfoVo.setGrade(getUserGrade(userInfo.getEnrollmentYear()));
         userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
 
         return userInfoVo;
     }
 
     /**
-     * 获取用户年级
+     * 获取用户年级, --暂时弃用
      * todo 未完善
-     *
+     * @author huiyuan
      * @param enrollmentYear
      * @return
      */

@@ -2,6 +2,7 @@ package com.ailab.ailabsystem.service;
 
 import com.ailab.ailabsystem.common.R;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
+import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
@@ -53,4 +54,6 @@ public interface UserService extends IService<User> {
     String getUserRightName(Integer userRight);
 
     R getInfoOfMe(String loginUserKey);
+
+    R updateMyInfo(UserInfoDTO userInfoDTO);
 }

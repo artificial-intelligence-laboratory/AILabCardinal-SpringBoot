@@ -11,6 +11,7 @@ import com.ailab.ailabsystem.common.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.dto.SingInRequest;
+import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.InOutRegistration;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
@@ -157,5 +158,13 @@ public class UserController {
         String authorization = RequestUtil.getAuthorization(request);
         String loginUserKey = RedisKey.getLoginUserKey(authorization);
         return userService.getInfoOfMe(loginUserKey);
+    }
+
+    @PutMapping("/update/my/info")
+    public R updateMyInfo(@RequestBody UserInfoDTO userInfoDTO) {
+        if (userInfoDTO == null) {
+            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+        }
+        return userService.updateMyInfo(userInfoDTO);
     }
 }
