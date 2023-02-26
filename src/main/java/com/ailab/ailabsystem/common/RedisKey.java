@@ -18,6 +18,11 @@ public class RedisKey {
     private static final String LOGIN_USER = "login:user";
 
     /**
+     * 用户的邮箱验证码
+     */
+    private static final String EMAIL_CODE = "user_emailCode";
+
+    /**
      * 用户签到
      */
     private static final String USER_SIGN_IN = "user:signIn";
@@ -31,6 +36,12 @@ public class RedisKey {
      * 用户信息列表key
      */
     private static final String USER_INFOS = "user:userInfos";
+
+    /**
+     * 往届用户简单信息列表key
+     */
+    private static final String SIMPLE_USER_INFOS = "user:simpleUserInfos";
+
 
     /**
      * 用户个人信息
@@ -93,10 +104,32 @@ public class RedisKey {
     }
 
     /**
+     * 实验室信息区
+     */
+    public static String getIndexAiLabInfo() {
+        return INDEX_USER_INFO;
+    }
+
+    /**
      * 用户的项目信息
      * @return
      */
     public static String getUserProject(Long userId) {
         return USER_PROJECT + SPLIT + userId;
     }
+
+    /**
+     * 获取用户邮箱验证码key
+     */
+    public static String getEmailCode(Long userId) {
+        return EMAIL_CODE + SPLIT + userId;
+    }
+
+    /**
+     * 获取简单用户信息
+     */
+    public static String getPreSimpleUserInfos() {
+        return SIMPLE_USER_INFOS;
+    }
+
 }

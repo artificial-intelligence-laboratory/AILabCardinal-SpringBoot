@@ -5,6 +5,8 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
 import com.ailab.ailabsystem.common.RedisKey;
@@ -16,15 +18,15 @@ import com.ailab.ailabsystem.model.entity.InOutRegistration;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
+import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.SignInService;
 import com.ailab.ailabsystem.service.UserService;
-import com.ailab.ailabsystem.util.RedisOperator;
-import com.ailab.ailabsystem.util.RequestUtil;
-import com.ailab.ailabsystem.util.TimeUtil;
-import com.ailab.ailabsystem.util.UserHolder;
+import com.ailab.ailabsystem.util.*;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author xiaozhi
@@ -46,6 +51,8 @@ import java.util.Map;
 @RestController
 public class UserController {
 
+    private static final ExecutorService SEND_EMAIL_EXECUTOR = Executors.newSingleThreadExecutor();
+
     @Resource
     private RedisOperator redis;
 
@@ -54,6 +61,9 @@ public class UserController {
 
     @Resource
     private SignInService signInService;
+
+    @Autowired
+    private SendEmailUtils sendEmailUtils;
 
     @ApiOperation(value = "判断是否已经签到接口", notes = "判断是否已经签到接口")
     @GetMapping("/isSingIn")
@@ -68,11 +78,11 @@ public class UserController {
 
     @ApiOperation(value = "签到接口", notes = "签到接口")
     @PostMapping("/signIn")
-    public R<Object> singIn(@ApiIgnore @RequestBody SingInRequest singInRequest) {
+    public R<Object> singIn(@RequestBody SingInRequest singInRequest) {
         Assert.notNull(singInRequest, "参数异常");
         // 设置默认值
         String task = ObjectUtil.defaultIfBlank(singInRequest.getTask(), CommonConstant.TASK_DEFAULT_VALUE);
-        Double time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
+        String time = ObjectUtil.defaultIfNull(singInRequest.getCheckOutTime(), CommonConstant.DEFAULT_CHECK_OUT_TIME);
         String remark = ObjectUtil.defaultIfNull(singInRequest.getRemark(), "");
 
         // 限定签到时间： 8:00 - 22:00
@@ -112,11 +122,11 @@ public class UserController {
      * @param maxHours      最大时间 - 1，比如最大时间为23，那么设置时间为22
      * @return 签到时间
      */
-    private Date getCheckOutTime(Double time, Date currentTime, Integer maxHours) {
+    private Date getCheckOutTime(String time, Date currentTime, Integer maxHours) {
         // 获取随机半小时的时间 - 毫秒数
         long halfHour = DateUtils.MILLIS_PER_MINUTE * 30;
         // 结束时间加随机时间
-        long addTime =  (RandomUtil.randomLong(-halfHour, halfHour) + (long)(time * DateUtils.MILLIS_PER_HOUR));
+        long addTime =  (RandomUtil.randomLong(-halfHour, halfHour) + (Long.parseLong(time) * DateUtils.MILLIS_PER_HOUR));
         // 获取签出时间
         Date checkOutTime = DateUtils.addMilliseconds(currentTime, (int) addTime);
         // 获取签到时间是几点
@@ -152,7 +162,7 @@ public class UserController {
         return userService.getIndexUserInfo(loginUserKey);
     }
 
-    @ApiOperation(value = "获取个人详情学生信息", notes = "获取个人详情学生信息")
+    @ApiOperation(value = "获取自己的详情信息", notes = "获取自己的详情信息")
     @GetMapping("/Info/of/me")
     public R getInfoOfMe(HttpServletRequest request) {
         String authorization = RequestUtil.getAuthorization(request);
@@ -160,11 +170,106 @@ public class UserController {
         return userService.getInfoOfMe(loginUserKey);
     }
 
+    @ApiOperation(value = "获取个人详情学生信息", notes = "获取个人详情学生信息")
+    @GetMapping("/Info/of/id")
+    public R getInfoOfId(Long userId) {
+        return userService.getInfoById(userId);
+    }
+
+    @ApiOperation(value = "新增个人信息", notes = "新增个人信息")
     @PutMapping("/update/my/info")
-    public R updateMyInfo(@RequestBody UserInfoDTO userInfoDTO) {
+    public R updateMyInfo(@RequestBody UserInfoDTO userInfoDTO, HttpServletRequest request) {
+        //获取用户登录token
+        String token = RequestUtil.getAuthorization(request);
+        if (StrUtil.isBlank(token)) {
+            throw new CustomException(ResponseStatusEnum.SESSION_EXPIRE);
+        }
         if (userInfoDTO == null) {
             throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
         }
-        return userService.updateMyInfo(userInfoDTO);
+        return userService.updateMyInfo(userInfoDTO, token);
+    }
+
+    @ApiOperation(value = "绑定手机号", notes = "绑定手机号")
+    @PutMapping("/bind/phone")
+    public R bindPhone(HttpServletRequest request, Long userId, String phone) {
+        if (userId == null) {
+            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+        }
+        if (StrUtil.isBlank(phone)) {
+            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+        }
+        if (!PatternUtil.matchPhonePattern(phone)) {
+            throw new CustomException(ResponseStatusEnum.PHONE_ERROR);
+        }
+        String token = RequestUtil.getAuthorization(request);
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper();
+        updateWrapper.eq("user_id", userId).set("phone", phone);
+        userService.update(updateWrapper);
+        User user = userService.getById(userId);
+        if (user == null) {
+            throw new CustomException(ResponseStatusEnum.NOT_FOUND_ERROR);
+        }
+        UserVo userVo = BeanUtil.copyProperties(user, UserVo.class);
+        String userVoJson = JSONUtil.toJsonStr(userVo);
+        redis.set(RedisKey.getLoginUserKey(token),userVoJson);
+        return R.success(userVo);
+    }
+
+    @ApiOperation(value = "发送验证码到邮箱", notes = "发送验证码到邮箱")
+    @GetMapping("/send/code")
+    public R sendCode(Long userId, String email) {
+        if (userId == null) {
+            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+        }
+        if (StrUtil.isBlank(email)) {
+            throw new CustomException(ResponseStatusEnum.EMAIL_ERROR);
+        }
+        if (!PatternUtil.matchEmailPattern(email)) {
+            throw new CustomException(ResponseStatusEnum.EMAIL_ERROR);
+        }
+        String emailCode = RandomUtil.randomNumbers(6);
+        SEND_EMAIL_EXECUTOR.submit(new HandleSendEmail(email, emailCode));
+        redis.set(RedisKey.getEmailCode(userId), emailCode, 60 * 5);
+        return R.success();
+    }
+
+    @ApiOperation(value = "校验验证码并绑定邮箱", notes = "校验验证码并绑定邮箱")
+    @PutMapping("/bind/email")
+    public R bindEmail(HttpServletRequest request, String email, String code) {
+        String token = RequestUtil.getAuthorization(request);
+        String userVoJson = redis.get(RedisKey.getLoginUserKey(token));
+        if (userVoJson == null) {
+            throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
+        }
+        UserVo userVo = JSONUtil.toBean(userVoJson, UserVo.class);
+        String emailCOde = redis.get(RedisKey.getEmailCode(userVo.getUserId()));
+        if (!code.equals(emailCOde)) {
+            throw new CustomException(ResponseStatusEnum.CODE_ERROR);
+        }
+        return userService.bindEmail(userVo.getUserId(), email, token);
+    }
+
+    @ApiOperation(value = "获取成员列表")
+    @GetMapping("/getSimpleUser")
+    public R getSimpleUser() {
+        return userService.getSimpleUserInfoList();
+    }
+
+    private class HandleSendEmail implements Runnable {
+
+        private final String email;
+
+        private final String emailCode;
+
+        public HandleSendEmail(String email, String emailCode) {
+            this.email = email;
+            this.emailCode = emailCode;
+        }
+
+        @Override
+        public void run() {
+            sendEmailUtils.sendSimpleMail(email, SendEmailUtils.subject, SendEmailUtils.getContent(emailCode));
+        }
     }
 }

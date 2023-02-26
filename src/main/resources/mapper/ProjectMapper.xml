@@ -22,6 +22,7 @@
         select *
         from project
         where project_id
-        IN (select project_id FROM project_member WHERE user_id = 1)
+        IN (select project_id FROM project_member WHERE user_id = #{userId})
+        order by year desc
     </select>
 </mapper>

@@ -28,9 +28,19 @@ public class UserInfoVo implements Serializable {
     private Long userId;
 
     /**
+     * 学号
+     */
+    private String studentNumber;
+
+    /**
      * 真实姓名 √
      */
     private String realName;
+
+    /**
+     * 用户头像URL
+     */
+    private String avatar;
 
     /**
      * 籍贯 √

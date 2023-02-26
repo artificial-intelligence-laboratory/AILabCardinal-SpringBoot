@@ -8,6 +8,7 @@ import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -55,5 +56,11 @@ public interface UserService extends IService<User> {
 
     R getInfoOfMe(String loginUserKey);
 
-    R updateMyInfo(UserInfoDTO userInfoDTO);
+    R getInfoById(Long userId);
+
+    R updateMyInfo(UserInfoDTO userInfoDTO, String token);
+
+    R bindEmail(Long userId, String email, String token);
+
+    R getSimpleUserInfoList();
 }

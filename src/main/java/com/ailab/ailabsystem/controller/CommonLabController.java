@@ -57,7 +57,7 @@ public class CommonLabController {
         aiLabInfo.setProjectCount(projectMemberMapper.getLabProjectCount());
         aiLabInfo.setAwardCount(awardMapper.getLabAwardCount());
         String labInfoJsonStr = JSONUtil.toJsonStr(aiLabInfo);
-        redis.set(labInfoJson, labInfoJsonStr, 60 * 30);
+        redis.set(RedisKey.getIndexAiLabInfo(), labInfoJsonStr, 60 * 30);
         return R.success(aiLabInfo);
     }
 }
