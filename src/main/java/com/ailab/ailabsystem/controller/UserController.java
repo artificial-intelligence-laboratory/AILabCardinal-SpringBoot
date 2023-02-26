@@ -153,7 +153,7 @@ public class UserController {
         return R.success(userInfo);
     }
 
-    @ApiOperation(value = "获取学生的首页信息", notes = "获取学生的首页信息")
+    @ApiOperation(value = "获取学生的首页信息", notes = "用于获取学生首页的基本信息")
     @GetMapping("/getIndexUserInfo")
     public R getIndexUserInfo(HttpServletRequest request) {
         //获取用户登录凭证token
@@ -162,7 +162,7 @@ public class UserController {
         return userService.getIndexUserInfo(loginUserKey);
     }
 
-    @ApiOperation(value = "获取自己的详情信息", notes = "获取自己的详情信息")
+    @ApiOperation(value = "获取自己的详情信息", notes = "获取首页侧边栏中的我的信息")
     @GetMapping("/Info/of/me")
     public R getInfoOfMe(HttpServletRequest request) {
         String authorization = RequestUtil.getAuthorization(request);
@@ -170,13 +170,13 @@ public class UserController {
         return userService.getInfoOfMe(loginUserKey);
     }
 
-    @ApiOperation(value = "获取个人详情学生信息", notes = "获取个人详情学生信息")
+    @ApiOperation(value = "获取个人详情学生信息", notes = "用于获取成员页中其他成员的详细信息")
     @GetMapping("/Info/of/id")
     public R getInfoOfId(Long userId) {
         return userService.getInfoById(userId);
     }
 
-    @ApiOperation(value = "新增个人信息", notes = "新增个人信息")
+    @ApiOperation(value = "新增个人信息", notes = "侧边栏中的新增信息")
     @PutMapping("/update/my/info")
     public R updateMyInfo(@RequestBody UserInfoDTO userInfoDTO, HttpServletRequest request) {
         //获取用户登录token
@@ -190,7 +190,7 @@ public class UserController {
         return userService.updateMyInfo(userInfoDTO, token);
     }
 
-    @ApiOperation(value = "绑定手机号", notes = "绑定手机号")
+    @ApiOperation(value = "绑定手机号", notes = "绑定手机号码，要注意手机号码格式，格式不对会报错")
     @PutMapping("/bind/phone")
     public R bindPhone(HttpServletRequest request, Long userId, String phone) {
         if (userId == null) {

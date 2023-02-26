@@ -88,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 转成json
         String userJson = JSONUtil.toJsonStr(userVo);
         // 存入redis
-        redis.set(loginUserKey, userJson);
+        redis.set(loginUserKey, userJson, CommonConstant.ONE_WEEK);
         HashMap<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("user", userVo);
