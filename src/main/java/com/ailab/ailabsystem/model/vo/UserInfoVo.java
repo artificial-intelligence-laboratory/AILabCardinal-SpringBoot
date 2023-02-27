@@ -1,6 +1,7 @@
 package com.ailab.ailabsystem.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.List;
  * @create 2022-11-2022/11/11 23:56
  */
 @Data
+@ApiModel
 public class UserInfoVo implements Serializable {
 
     private static final long serialVersionUID = 1L;

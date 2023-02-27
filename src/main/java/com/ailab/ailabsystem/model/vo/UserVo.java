@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.model.vo;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @create 2022-11-2022/11/11 23:56
  */
 @Data
+@ApiModel
 public class UserVo implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -1,12 +1,14 @@
 package com.ailab.ailabsystem.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@ApiModel
 public class UserSimpleVo implements Serializable {
 
     private static final long serialVersionUID = 1L;

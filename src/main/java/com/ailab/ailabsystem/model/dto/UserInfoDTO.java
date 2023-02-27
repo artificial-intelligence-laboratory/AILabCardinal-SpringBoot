@@ -1,11 +1,13 @@
 package com.ailab.ailabsystem.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
+@ApiModel
 public class UserInfoDTO {
 
     private Long userInfoId;

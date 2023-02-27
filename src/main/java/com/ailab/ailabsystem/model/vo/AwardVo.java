@@ -1,11 +1,13 @@
 package com.ailab.ailabsystem.model.vo;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@ApiModel
 public class AwardVo implements Serializable {
 
     private static final long serialVersionUID = 1L;

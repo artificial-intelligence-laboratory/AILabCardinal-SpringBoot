@@ -1,11 +1,13 @@
 package com.ailab.ailabsystem.model.vo;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
+@ApiModel
 public class IndexUserVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
