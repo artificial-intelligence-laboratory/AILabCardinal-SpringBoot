@@ -18,6 +18,7 @@ public enum ResponseStatusEnum {
     USERNAME_PASSWORD_ERROR(401, false, "账号或密码不正确，请求重新输入"),
     NOT_FOUND_ERROR(40400, false, "请求数据不存在"),
     FORBIDDEN_ERROR(401, false, "该账号已被禁用，请联系管理员"),
+    EXISTS_ERROR(402, false, "该账号已登录"),
     SYSTEM_ERROR(50000, false, "系统内部异常"),
     OPERATION_ERROR(50001, false, "操作失败"),
     SGININ_ERROR(411, false, "您已签到或当前非签到时间"),
