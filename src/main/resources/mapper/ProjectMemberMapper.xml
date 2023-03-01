@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ailab.ailabsystem.mapper.ProjectMemberMapper">
+
+    <resultMap id="BaseResultMap" type="com.ailab.ailabsystem.model.entity.ProjectMember">
+            <id property="projectUserId" column="project_user_id" jdbcType="INTEGER"/>
+            <result property="projectId" column="project_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="role" column="role" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        project_user_id,project_id,user_id,
+        role
+    </sql>
+
+    <select id="getLabProjectCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT project_id) FROM project_member
+        WHERE user_id IN
+        (SELECT user_id FROM `user` where user_right = 2 or user_right = 3)
+    </select>
+</mapper>

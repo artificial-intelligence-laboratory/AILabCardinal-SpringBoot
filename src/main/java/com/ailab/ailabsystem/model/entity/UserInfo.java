@@ -1,5 +1,6 @@
 package com.ailab.ailabsystem.model.entity;
 
+import cn.hutool.log.Log;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -26,7 +27,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户id
      */
-    private Integer userId;
+    private Long userId;
 
     /**
      * 真实姓名
@@ -44,6 +45,11 @@ public class UserInfo implements Serializable {
      */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date enrollmentYear;
+
+    /**
+     * 用户年级
+     */
+    private String grade;
 
     /**
      * 籍贯
@@ -82,21 +88,8 @@ public class UserInfo implements Serializable {
     private String githubId;
 
     /**
-     * github url
-     */
-    //todo:GitHub url 进行删除
-    private String githubUrl;
-
-    /**
      * 宿舍号
      */
     private String dormitoryNumber;
-
-    /**
-     * 毕业时间
-     */
-    //todo:毕业时间 进行删除
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date graduationTime;
 
 }

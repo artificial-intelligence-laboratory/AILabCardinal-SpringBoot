@@ -1,6 +1,8 @@
 package com.ailab.ailabsystem.config;
 
 import com.ailab.ailabsystem.interceptor.LoginInterceptor;
+import com.ailab.ailabsystem.interceptor.RefreshTokenInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -15,8 +17,11 @@ import javax.annotation.Resource;
 @Configuration
 public class Interceptors implements WebMvcConfigurer {
 
-    @Resource
+    @Autowired
     private LoginInterceptor loginInterceptor;
+
+    @Autowired
+    private RefreshTokenInterceptor refreshTokenInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -27,6 +32,11 @@ public class Interceptors implements WebMvcConfigurer {
                         "/navigation/**")
                 .excludePathPatterns(
                         "/passport/login"
-                );
+                ).order(1);
+        registry.addInterceptor(refreshTokenInterceptor)
+                .addPathPatterns(
+                        "/user/getIndexUserInfo",
+                        "/lab/getLabInfo"
+                ).order(0);
     }
 }

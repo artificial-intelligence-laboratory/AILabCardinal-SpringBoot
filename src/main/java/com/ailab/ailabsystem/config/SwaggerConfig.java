@@ -10,7 +10,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 
 /**
@@ -19,8 +19,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @create 2022-10-2022/10/12 15:02
  */
 @Configuration
-@EnableSwagger2
-public class Swagger2 {
+@EnableSwagger2WebMvc
+public class SwaggerConfig {
 
     //    http://localhost:8080/swagger-ui.html     原路径
     //    http://localhost:8080/doc.html            新路径

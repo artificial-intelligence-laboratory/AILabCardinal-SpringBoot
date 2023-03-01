@@ -25,5 +25,5 @@ public class SingInRequest {
     /**
      * 签出时间
      */
-    private Double checkOutTime;
+    private String checkOutTime;
 }

@@ -15,7 +15,22 @@ public class CommonConstant {
     /**
      * 默认签出时间，5小时
      */
-    public static final Double DEFAULT_CHECK_OUT_TIME = 5.0;
+    public static final String DEFAULT_CHECK_OUT_TIME = "5";
+
+    /**
+     * 一个月
+     */
+    public static final Integer ONE_MONTH = 60 * 60 * 24 * 30;
+
+    /**
+     * 一个星期
+     */
+    public static final Integer ONE_WEEK = 60 * 60 * 24 * 7;
+
+    /**
+     * 一天
+     */
+    public static final Integer ONE_DAT = 60 * 60 * 24;
 
     /**
      * 一个小时

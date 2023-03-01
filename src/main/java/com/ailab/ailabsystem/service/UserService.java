@@ -2,11 +2,13 @@ package com.ailab.ailabsystem.service;
 
 import com.ailab.ailabsystem.common.R;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
+import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +37,30 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserInfo getUserInfo(Integer userInfoId);
+
+    UserInfo getUserInfoByUserId(Long userId);
+
+    /**
+     * 获取首页学生信息
+     * @param loginUserKey redis存储用户信息的key
+     * @return
+     */
+    R getIndexUserInfo(String loginUserKey);
+
+    /**
+     * 获取用户权限名
+     * @param userRight 用户的数字型权限
+     * @return
+     */
+    String getUserRightName(Integer userRight);
+
+    R getInfoOfMe(String loginUserKey);
+
+    R getInfoById(Long userId);
+
+    R updateMyInfo(UserInfoDTO userInfoDTO, String token);
+
+    R bindEmail(Long userId, String email, String token);
+
+    R getSimpleUserInfoList();
 }

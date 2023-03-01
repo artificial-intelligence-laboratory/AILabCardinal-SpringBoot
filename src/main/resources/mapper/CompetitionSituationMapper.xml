@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ailab.ailabsystem.mapper.CompetitionSituationMapper">
+
+    <resultMap id="BaseResultMap" type="com.ailab.ailabsystem.model.entity.CompetitionSituation">
+            <id property="competitionSituationId" column="competition_situation_id" jdbcType="INTEGER"/>
+            <result property="competitionId" column="competition_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        competition_situation_id,competition_id,user_id
+    </sql>
+
+    <select id="queryCompetitionCount" resultType="java.lang.Integer" parameterType="long">
+        select count(*) from competition_situation
+        where user_id = #{userId}
+        and competition_id
+        IN (SELECT competition_id FROM competition where competition_status = 0)
+    </select>
+
+</mapper>

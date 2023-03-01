@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ailab.ailabsystem.mapper.IntranetMapper">
+
+    <resultMap id="BaseResultMap" type="com.ailab.ailabsystem.model.entity.Intranet">
+            <id property="intranetId" column="intranet_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="intranetIp" column="intranet_ip" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        intranet_id,user_id,intranet_ip
+    </sql>
+</mapper>
