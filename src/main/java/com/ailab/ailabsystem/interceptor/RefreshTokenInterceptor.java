@@ -42,19 +42,12 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         }
         // 4.将查询到的hash数据转为UserVo
         UserVo userVo = JSONUtil.toBean(userStr, UserVo.class);
-        User user = BeanUtil.copyProperties(userVo, User.class);
-        UserHolder.saveUser(user);
+        UserHolder.saveUser(userVo);
         // 5.刷新token有效期
         String str = JSONUtil.toJsonStr(userVo);
         redis.set(RedisKey.getLoginUserKey(token), str, CommonConstant.ONE_WEEK);
         // 6.放行
         return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 移除用户
-        UserHolder.removeUser();
     }
 }
 	

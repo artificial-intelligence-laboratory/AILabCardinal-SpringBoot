@@ -2,15 +2,16 @@ package com.ailab.ailabsystem.util;
 
 
 import com.ailab.ailabsystem.model.entity.User;
+import com.ailab.ailabsystem.model.vo.UserVo;
 
 public class UserHolder {
-    private static final ThreadLocal<User> tl = new ThreadLocal<>();
+    private static final ThreadLocal<UserVo> tl = new ThreadLocal<>();
 
-    public static void saveUser(User user){
-        tl.set(user);
+    public static void saveUser(UserVo userVo){
+        tl.set(userVo);
     }
 
-    public static User getUser(){
+    public static UserVo getUser(){
         return tl.get();
     }
 

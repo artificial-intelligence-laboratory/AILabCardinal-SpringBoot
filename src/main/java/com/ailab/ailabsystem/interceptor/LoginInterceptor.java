@@ -5,6 +5,7 @@ import com.ailab.ailabsystem.common.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.entity.User;
+import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.IPUtil;
 import com.ailab.ailabsystem.util.RedisOperator;
@@ -48,9 +49,6 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (StringUtils.isBlank(userJson)) {
             throw new CustomException(ResponseStatusEnum.SESSION_EXPIRE);
         }
-        User user = JSONUtil.toBean(userJson, User.class);
-        // 本次请求持有用户
-        UserHolder.saveUser(user);
         return true;
     }
 
@@ -58,15 +56,13 @@ public class LoginInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Object handler, Exception ex) throws Exception {
-        User user = UserHolder.getUser();
+        UserVo userVo = UserHolder.getUser();
         // 记录用户最后现在时间和ip
         String ip = IPUtil.getIpAddress(request);
         UpdateWrapper<User> wrapper = new UpdateWrapper<>();
         wrapper.set("last_online_ip", ip);
         wrapper.set("last_online_time", new Date());
-        wrapper.eq("user_id", user.getUserId());
+        wrapper.eq("user_id", userVo.getUserId());
         userService.update(wrapper);
-        // 移除用户
-        UserHolder.removeUser();
     }
 }

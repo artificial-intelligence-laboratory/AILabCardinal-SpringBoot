@@ -18,6 +18,7 @@ import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.*;
 import com.ailab.ailabsystem.service.UserService;
+import com.ailab.ailabsystem.util.MD5Util;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.RequestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -67,11 +68,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RedisOperator redis;
 
     @Override
-    public R<Object> login(LoginRequest loginRequest) {
+    public R<Object> login(HttpServletRequest request, LoginRequest loginRequest) {
+        boolean existed = redis.keyIsExist(RedisKey.getLoginUserKey(RequestUtil.getAuthorization(request)));
+        if (existed) {
+            throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
+        }
         //todo 将获取到的密码进行MD5加密处理(先写在这里，之后再考虑)
         String password = loginRequest.getPassword();
         String studentNumber = loginRequest.getStudentNumber();
-        User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, password);
+        String safePassword = MD5Util.encodeByMD5(password);
+        User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, safePassword);
         if (ObjectUtil.isNull(userLogin)) {
             throw new CustomException(ResponseStatusEnum.USERNAME_PASSWORD_ERROR);
         }
@@ -80,15 +86,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new CustomException(ResponseStatusEnum.FORBIDDEN_ERROR);
         }
         // 登录成功，生成随机token
-        String token = UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString().replace("-", "");
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
-        // 转成json
-        String userJson = JSONUtil.toJsonStr(userVo);
         // 存入redis
-        redis.set(loginUserKey, userJson, CommonConstant.ONE_WEEK);
+        redis.set(loginUserKey, JSONUtil.toJsonStr(userVo), CommonConstant.ONE_WEEK);
         HashMap<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("user", userVo);
