@@ -21,6 +21,7 @@ import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.MD5Util;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.RequestUtil;
+import com.ailab.ailabsystem.util.UserHolder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -69,13 +70,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public R<Object> login(HttpServletRequest request, LoginRequest loginRequest) {
-        boolean existed = redis.keyIsExist(RedisKey.getLoginUserKey(RequestUtil.getAuthorization(request)));
-        if (existed) {
-            throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
-        }
-        //todo 将获取到的密码进行MD5加密处理(先写在这里，之后再考虑)
-        String password = loginRequest.getPassword();
+        //获取用户学号密码
         String studentNumber = loginRequest.getStudentNumber();
+        String password = loginRequest.getPassword();
+        //先从redis获取登录时存放的userVo
+        String userVoStr = redis.get(RedisKey.getLoginUserKey(RequestUtil.getAuthorization(request)));
+        //非空判断
+        if (StrUtil.isNotBlank(userVoStr)) {
+            UserVo userVo = JSONUtil.toBean(userVoStr, UserVo.class);
+            //用学号做比较用户是否登录
+            if (UserHolder.getUser() != null || studentNumber.equals(userVo.getStudentNumber())) {
+                throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
+            }
+        }
         String safePassword = MD5Util.encodeByMD5(password);
         User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, safePassword);
         if (ObjectUtil.isNull(userLogin)) {
@@ -89,6 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String token = UUID.randomUUID().toString().replace("-", "");
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
+        UserHolder.saveUser(userVo);
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
         // 存入redis

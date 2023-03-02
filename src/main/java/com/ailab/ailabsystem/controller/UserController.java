@@ -68,9 +68,9 @@ public class UserController {
     @ApiOperation(value = "判断是否已经签到接口", notes = "判断是否已经签到接口")
     @GetMapping("/isSingIn")
     public R<Object> isSingIn() {
-        User user = UserHolder.getUser();
+        UserVo userVo = UserHolder.getUser();
         // 判断是否已经签到
-        if (redis.keyIsExist(RedisKey.getUserSignIn(user.getUserId()))) {
+        if (redis.keyIsExist(RedisKey.getUserSignIn(userVo.getUserId()))) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         return R.success();
@@ -92,7 +92,8 @@ public class UserController {
         if (hour < 8 || hour > 22) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
-        User user = UserHolder.getUser();
+        UserVo userVo = UserHolder.getUser();
+        User user = userService.getById(userVo.getUserId());
         // 判断是否已经签到
         if (redis.keyIsExist(RedisKey.getUserSignIn(user.getUserId()))) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
