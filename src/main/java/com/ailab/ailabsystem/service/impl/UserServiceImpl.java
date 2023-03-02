@@ -18,10 +18,7 @@ import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.*;
 import com.ailab.ailabsystem.service.UserService;
-import com.ailab.ailabsystem.util.MD5Util;
-import com.ailab.ailabsystem.util.RedisOperator;
-import com.ailab.ailabsystem.util.RequestUtil;
-import com.ailab.ailabsystem.util.UserHolder;
+import com.ailab.ailabsystem.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -30,6 +27,7 @@ import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
@@ -134,8 +132,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (currentOrPrevious(userInfo.getEnrollmentYear())) {
                 previousStudents.add(userInfoVo);
             } else {
-                // 获取年级
-                String stuGrade = getStuGrade(userInfo.getEnrollmentYear());
+                 //获取年级
+                String stuGrade = userInfo.getEnrollmentYear();
                 userInfoVo.setGrade(stuGrade);
                 currentStudents.add(userInfoVo);
             }
@@ -160,11 +158,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userSimpleVo.setUserRight(user.getUserRight());
             userSimpleVo.setAvatar(user.getAvatar());
             UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
-            Date enrollmentYear = userInfo.getEnrollmentYear();
+            String enrollmentYear = userInfo.getEnrollmentYear();
             if (currentOrPrevious(enrollmentYear)) {
                 previousStudents.add(userSimpleVo);
             } else {
-                userSimpleVo.setGrade(getStuGrade(enrollmentYear));
+                userSimpleVo.setGrade(enrollmentYear);
                 currentStudents.add(userSimpleVo);
             }
         });
@@ -327,8 +325,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success(map);
     }
 
+    @Transactional
     @Override
     public R updateMyInfo(UserInfoDTO userInfoDTO,  String token) {
+        //校验前端传的数据
+        CheckDataUtil.checkUserInfoDTO(userInfoDTO);
         //从数据库中获取userInfo
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserInfoId, userInfoDTO.getUserInfoId());
@@ -348,6 +349,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success();
     }
 
+    @Transactional
     @Override
     public R bindEmail(Long userId, String email, String token) {
         UpdateWrapper<User> updateWrapper = new UpdateWrapper();
@@ -429,7 +431,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //专业班级、年级、内网、头像
         userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
         //已在user_info表及其实体类增加grade字段
-        userInfoVo.setGrade(getStuGrade(userInfo.getEnrollmentYear()));
+        userInfoVo.setGrade(userInfo.getEnrollmentYear());
         userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
         userInfoVo.setAvatar(getUserAvatar(userInfo.getUserId()));
         return userInfoVo;
@@ -442,16 +444,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param enrollmentYear
      * @return true代表往届，false代表本届
      */
-    private boolean currentOrPrevious(Date enrollmentYear) {
+    private boolean currentOrPrevious(String enrollmentYear) {
         if (enrollmentYear == null) {
             throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
         }
-        Date date = new Date();
-        long l = date.getTime() - enrollmentYear.getTime();
-        //计算出现在距离入学时间的天数
-        l = l / 1000 / 86400;
-        long year = l / 365;
-        return year > 3;
+        return System.currentTimeMillis() > TimeUtil.getGraduateTime(enrollmentYear).getTime();
     }
 
     private String getStuGrade(Date enrollmentYear) {
@@ -469,6 +466,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return String.valueOf(stuYear);
     }
 
+    /**
+     * 根据入学时间推断学生的年份， 弃用
+     * @param month
+     * @param currentYear
+     * @return
+     */
     private int getStuYear(int month, int currentYear) {
         if (month >= 4 && month <= 12) {
             currentYear = currentYear - 1;

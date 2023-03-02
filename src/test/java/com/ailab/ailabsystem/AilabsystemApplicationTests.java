@@ -7,6 +7,7 @@ import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.SendEmailUtils;
+import com.ailab.ailabsystem.util.TimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.Test;
@@ -75,28 +76,32 @@ class AilabsystemApplicationTests {
 
     @Test
     void timeTest() {
-        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserInfo::getUserInfoId, 4);
-        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
-        Date enrollmentYear = userInfo.getEnrollmentYear();
-        Date date = new Date();
-        long l = date.getTime() - enrollmentYear.getTime();
-        l = l / 1000 / 86400;
-        int month = (int) (l / 30);
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        if (month >= 4 && month <= 12) {
-            currentYear = currentYear - 1;
-        }
-        if (month > 12 && month <= 24) {
-            currentYear = currentYear - 2;
-        }
-        if (month > 24 && month <= 36) {
-            currentYear = currentYear - 3;
-        }
-        if (month > 36 && month <= 48) {
-            currentYear = currentYear - 4;
-        }
-        System.out.println(currentYear);
+//        LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(UserInfo::getUserInfoId, 4);
+//        UserInfo userInfo = userInfoMapper.selectOne(queryWrapper);
+        Integer value = Integer.valueOf("2019");
+        int year = TimeUtil.getSysYear();
+        System.out.println(year - value);
+//        System.out.println(year - value);
+//        Date enrollmentYear = userInfo.getEnrollmentYear();
+//        Date date = new Date();
+//        long l = date.getTime() - enrollmentYear.getTime();
+//        l = l / 1000 / 86400;
+//        int month = (int) (l / 30);
+//        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+//        if (month >= 4 && month <= 12) {
+//            currentYear = currentYear - 1;
+//        }
+//        if (month > 12 && month <= 24) {
+//            currentYear = currentYear - 2;
+//        }
+//        if (month > 24 && month <= 36) {
+//            currentYear = currentYear - 3;
+//        }
+//        if (month > 36 && month <= 48) {
+//            currentYear = currentYear - 4;
+//        }
+        System.out.println();
     }
 
     @Test
@@ -106,8 +111,13 @@ class AilabsystemApplicationTests {
 
 
     @Test
-    void testUUID() {
-
+    void testUpdateEnrollmentYear() {
+        List<UserInfo> userInfoList = userInfoMapper.selectList(null);
+        userInfoList.forEach(userInfo -> {
+//            userInfo.setEnrollmentYear(userInfo.getJoinAilabTime());
+            userInfo.setJoinAilabTime(null);
+            userInfoMapper.updateById(userInfo);
+        });
     }
 
 

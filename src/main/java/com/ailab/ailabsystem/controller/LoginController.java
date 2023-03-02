@@ -8,6 +8,7 @@ import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.service.UserService;
+import com.ailab.ailabsystem.util.CheckDataUtil;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.UserHolder;
@@ -47,6 +48,7 @@ public class LoginController {
             "<br>请求其他接口时在Authorization请求头中携带token发送请求，没有token会判断为未登录")
     @PostMapping("/login")
     public R<Object> userLogin(HttpServletRequest request, @RequestBody LoginRequest loginRequest){
+        CheckDataUtil.checkLoginRequest(loginRequest);
         return userService.login(request, loginRequest);
     }
 

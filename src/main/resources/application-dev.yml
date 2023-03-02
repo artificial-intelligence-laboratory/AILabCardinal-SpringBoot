@@ -19,7 +19,7 @@ spring:
   redis:
     host: r-7xv7ctef3xrpmphz49pd.redis.rds.aliyuncs.com
     port: 6379
-    database: 2
+    database: 3
     username: hf
     password: aLiYun123456
     lettuce:
@@ -49,3 +49,7 @@ mybatis-plus:
 custom:
   swagger:
     enable: true
+
+logging:
+  file:
+    path: A:\Java项目文件\AILab\AiLabCardinal-logging

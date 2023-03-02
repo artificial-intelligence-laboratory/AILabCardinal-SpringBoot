@@ -2,7 +2,13 @@ package com.ailab.ailabsystem.util;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
+import com.ailab.ailabsystem.common.CommonConstant;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.invoke.ConstantCallSite;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -10,7 +16,10 @@ import java.util.Date;
  * @description 时间工具类
  * @create 2022-11-2022/11/12 22:40
  */
+@Slf4j
 public class TimeUtil {
+
+    public static final String GRADUATE_MONTH_DAY = "-06-15";
 
     /**
      * 获取当前时间的小时
@@ -19,6 +28,27 @@ public class TimeUtil {
         DateTime date = cn.hutool.core.date.DateUtil.date(currentTime);
         // 获取当前时间
         return date.getField(DateField.HOUR_OF_DAY);
+    }
+
+    public static int getPrefixEnrollmentYear() {
+        return Integer.parseInt(CommonConstant.PREFIX_ENROLLMENT_YEAR);
+    }
+
+    public static int getSysYear() {
+        Calendar date = Calendar.getInstance();
+        return date.get(Calendar.YEAR);
+    }
+
+    public static Date getGraduateTime(String year){
+
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd ");
+            String graduateTime = year + GRADUATE_MONTH_DAY;
+            return formatter.parse(graduateTime);
+        } catch (ParseException e) {
+            log.error("转换时间错误");
+        }
+        return null;
     }
 
     /**

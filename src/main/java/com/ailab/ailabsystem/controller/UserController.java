@@ -174,6 +174,7 @@ public class UserController {
     @ApiOperation(value = "获取个人详情学生信息", notes = "用于获取成员页中其他成员的详细信息")
     @GetMapping("/Info/of/id")
     public R getInfoOfId(Long userId) {
+        CheckDataUtil.checkId(userId);
         return userService.getInfoById(userId);
     }
 

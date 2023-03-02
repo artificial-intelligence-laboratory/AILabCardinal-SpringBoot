@@ -14,6 +14,7 @@ import com.ailab.ailabsystem.util.UserHolder;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Resource;
@@ -49,9 +50,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (StringUtils.isBlank(userJson)) {
             throw new CustomException(ResponseStatusEnum.SESSION_EXPIRE);
         }
+        UserVo userVo = JSONUtil.toBean(userJson, UserVo.class);
+        UserHolder.saveUser(userVo);
         return true;
     }
 
+    @Transactional
     @Override
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,

@@ -23,7 +23,6 @@
             <result property="developmentDirection" column="development_direction"/>
             <result property="dormitoryNumber" column="dormitory_number"/>
             <result property="enrollmentYear" column="enrollment_year"/>
-            <result property="grade" column="grade"/>
             <result property="githubId" column="github_id"/>
             <result property="joinAilabTime" column="join_ailab_time"/>
             <result property="major" column="major"/>
@@ -48,7 +47,6 @@
                ui.development_direction,
                ui.dormitory_number,
                ui.enrollment_year,
-               ui.grade,
                ui.github_id,
                ui.join_ailab_time,
                ui.major,
