@@ -58,6 +58,11 @@ public class CommonConstant {
     public static final String PREVIOUS_STUDENTS = "previousStudents";
 
     /**
+     * 入学年份限制
+     */
+    public static final String PREFIX_ENROLLMENT_YEAR = "2010";
+
+    /**
      * 年级前缀
      */
     public static final String GRADE_PRE = "20";

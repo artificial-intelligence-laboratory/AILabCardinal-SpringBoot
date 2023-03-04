@@ -1,18 +1,16 @@
 package com.ailab.ailabsystem.interceptor;
 
-import cn.hutool.json.JSONUtil;
-import com.ailab.ailabsystem.common.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.entity.User;
+import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.IPUtil;
 import com.ailab.ailabsystem.util.RedisOperator;
-import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Resource;
@@ -38,35 +36,24 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-        String token = RequestUtil.getAuthorization(request);
-        // 未登录
-        if (StringUtils.isBlank(token)) {
+        if (UserHolder.getUser() == null) {
             throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
         }
-        String userJson = redis.get(RedisKey.getLoginUserKey(token));
-        // 会话过期
-        if (StringUtils.isBlank(userJson)) {
-            throw new CustomException(ResponseStatusEnum.SESSION_EXPIRE);
-        }
-        User user = JSONUtil.toBean(userJson, User.class);
-        // 本次请求持有用户
-        UserHolder.saveUser(user);
         return true;
     }
 
+    @Transactional
     @Override
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Object handler, Exception ex) throws Exception {
-        User user = UserHolder.getUser();
+        UserVo userVo = UserHolder.getUser();
         // 记录用户最后现在时间和ip
         String ip = IPUtil.getIpAddress(request);
         UpdateWrapper<User> wrapper = new UpdateWrapper<>();
         wrapper.set("last_online_ip", ip);
         wrapper.set("last_online_time", new Date());
-        wrapper.eq("user_id", user.getUserId());
+        wrapper.eq("user_id", userVo.getUserId());
         userService.update(wrapper);
-        // 移除用户
-        UserHolder.removeUser();
     }
 }

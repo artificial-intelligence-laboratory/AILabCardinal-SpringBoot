@@ -10,6 +10,7 @@
         <result property="password" column="password"/>
         <result property="avatar" column="avatar"/>
         <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
         <result property="userRight" column="user_right"/>
         <result property="lastOnlineIp" column="lastOnlineIp"/>
         <result property="lastOnlineIpAddress" column="last_online_ip_address"/>
@@ -23,7 +24,6 @@
             <result property="developmentDirection" column="development_direction"/>
             <result property="dormitoryNumber" column="dormitory_number"/>
             <result property="enrollmentYear" column="enrollment_year"/>
-            <result property="grade" column="grade"/>
             <result property="githubId" column="github_id"/>
             <result property="joinAilabTime" column="join_ailab_time"/>
             <result property="major" column="major"/>
@@ -38,6 +38,7 @@
                u.`password`,
                u.avatar,
                u.email,
+               u.phone,
                u.user_right,
                u.user_status,
                ui.user_info_id uiid,
@@ -48,7 +49,6 @@
                ui.development_direction,
                ui.dormitory_number,
                ui.enrollment_year,
-               ui.grade,
                ui.github_id,
                ui.join_ailab_time,
                ui.major,

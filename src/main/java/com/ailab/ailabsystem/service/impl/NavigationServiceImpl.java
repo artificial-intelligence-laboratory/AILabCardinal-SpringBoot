@@ -3,7 +3,7 @@ package com.ailab.ailabsystem.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.mapper.SiteMapper;
 import com.ailab.ailabsystem.mapper.SiteTypeMapper;
 import com.ailab.ailabsystem.model.entity.Site;

@@ -24,9 +24,9 @@ public class UserInfoDTO {
     private Date birthday;
 
     /**
-     * 用户年级
+     * 入学年份
      */
-    private String grade;
+    private String enrollmentYear;
 
     /**
      * 籍贯

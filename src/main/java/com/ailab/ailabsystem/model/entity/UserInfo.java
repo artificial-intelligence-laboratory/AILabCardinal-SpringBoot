@@ -40,16 +40,14 @@ public class UserInfo implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date birthday;
 
-    /**
-     * 入学年份
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date enrollmentYear;
+//    /**
+//     * 弃用此字段，改成入学年份
+//     * 入学年月日
+//     */
+//    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+//    private Date enrollmentYear;
 
-    /**
-     * 用户年级
-     */
-    private String grade;
+    private String enrollmentYear;
 
     /**
      * 籍贯

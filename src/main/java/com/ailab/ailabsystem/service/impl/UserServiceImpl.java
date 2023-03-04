@@ -3,12 +3,11 @@ package com.ailab.ailabsystem.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserStatus;
 import com.ailab.ailabsystem.exception.CustomException;
@@ -18,22 +17,19 @@ import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.*;
 import com.ailab.ailabsystem.service.UserService;
-import com.ailab.ailabsystem.util.RedisOperator;
-import com.ailab.ailabsystem.util.RequestUtil;
+import com.ailab.ailabsystem.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import springfox.documentation.spring.web.json.Json;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,11 +63,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RedisOperator redis;
 
     @Override
-    public R<Object> login(LoginRequest loginRequest) {
-        //todo 将获取到的密码进行MD5加密处理(先写在这里，之后再考虑)
-        String password = loginRequest.getPassword();
+    public R<Object> login(HttpServletRequest request, LoginRequest loginRequest) {
+        //获取用户学号密码
         String studentNumber = loginRequest.getStudentNumber();
-        User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, password);
+        String password = loginRequest.getPassword();
+        String safePassword = MD5Util.encodeByMD5(password);
+        User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, safePassword);
         if (ObjectUtil.isNull(userLogin)) {
             throw new CustomException(ResponseStatusEnum.USERNAME_PASSWORD_ERROR);
         }
@@ -80,18 +77,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new CustomException(ResponseStatusEnum.FORBIDDEN_ERROR);
         }
         // 登录成功，生成随机token
-        String token = UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString().replace("-", "");
+        String loginTokenKey = RedisKey.getUserLoginToken(studentNumber);
+        String loginToken = redis.get(loginTokenKey);
+        if (StrUtil.isNotBlank(loginToken)) {
+            throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
+        }
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
-        // 转成json
-        String userJson = JSONUtil.toJsonStr(userVo);
-        // 存入redis
-        redis.set(loginUserKey, userJson, CommonConstant.ONE_WEEK);
+        // 将userVo存入redis
+        redis.set(loginUserKey, JSONUtil.toJsonStr(userVo), CommonConstant.ONE_WEEK);
+        //将用户登录token存入redis
+        redis.set(loginTokenKey, token, CommonConstant.ONE_WEEK);
         HashMap<String, Object> map = new HashMap<>();
-        map.put("token", token);
-        map.put("user", userVo);
         return R.success(map);
     }
 
@@ -122,8 +122,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (currentOrPrevious(userInfo.getEnrollmentYear())) {
                 previousStudents.add(userInfoVo);
             } else {
-                // 获取年级
-                String stuGrade = getStuGrade(userInfo.getEnrollmentYear());
+                 //获取年级
+                String stuGrade = userInfo.getEnrollmentYear();
                 userInfoVo.setGrade(stuGrade);
                 currentStudents.add(userInfoVo);
             }
@@ -148,11 +148,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userSimpleVo.setUserRight(user.getUserRight());
             userSimpleVo.setAvatar(user.getAvatar());
             UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
-            Date enrollmentYear = userInfo.getEnrollmentYear();
+            String enrollmentYear = userInfo.getEnrollmentYear();
             if (currentOrPrevious(enrollmentYear)) {
                 previousStudents.add(userSimpleVo);
             } else {
-                userSimpleVo.setGrade(getStuGrade(enrollmentYear));
+                userSimpleVo.setGrade(enrollmentYear);
                 currentStudents.add(userSimpleVo);
             }
         });
@@ -252,7 +252,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             //注意，这里查询的是原始的userInfo，并非响应给前端的userInfoVo
             userInfo = getUserInfoByUserId(userId);
             //利用userInfo转化为userInfoVo信息
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
+
+            log.info(String.valueOf(userInfo));
+            log.info(String.valueOf(userInfoVo));
+
             String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
             redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
         } else {
@@ -280,7 +285,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public R getInfoById(Long userId) {
+    public R getInfoVoById(Long userId) {
         //先尝试从redis获取userInfo信息
         String userInfoJson = redis.get(RedisKey.getUserInfo(userId));
         UserInfo userInfo = new UserInfo();
@@ -288,7 +293,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StrUtil.isBlank(userInfoJson)) {
             QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_id", userId);
+            User user = this.getById(userId);
             userInfo = userInfoMapper.selectOne(queryWrapper);
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
             redis.set(RedisKey.getUserInfo(userId), JSONUtil.toJsonStr(userInfoVo), 60 * 30);
         } else {
@@ -315,8 +322,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success(map);
     }
 
+    @Transactional
     @Override
     public R updateMyInfo(UserInfoDTO userInfoDTO,  String token) {
+        //校验前端传的数据
+        CheckDataUtil.checkUserInfoDTO(userInfoDTO);
         //从数据库中获取userInfo
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserInfoId, userInfoDTO.getUserInfoId());
@@ -336,6 +346,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success();
     }
 
+    @Transactional
     @Override
     public R bindEmail(Long userId, String email, String token) {
         UpdateWrapper<User> updateWrapper = new UpdateWrapper();
@@ -417,7 +428,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //专业班级、年级、内网、头像
         userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
         //已在user_info表及其实体类增加grade字段
-        userInfoVo.setGrade(getStuGrade(userInfo.getEnrollmentYear()));
+        userInfoVo.setGrade(userInfo.getEnrollmentYear());
         userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
         userInfoVo.setAvatar(getUserAvatar(userInfo.getUserId()));
         return userInfoVo;
@@ -430,16 +441,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param enrollmentYear
      * @return true代表往届，false代表本届
      */
-    private boolean currentOrPrevious(Date enrollmentYear) {
+    private boolean currentOrPrevious(String enrollmentYear) {
         if (enrollmentYear == null) {
             throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
         }
-        Date date = new Date();
-        long l = date.getTime() - enrollmentYear.getTime();
-        //计算出现在距离入学时间的天数
-        l = l / 1000 / 86400;
-        long year = l / 365;
-        return year > 3;
+        return System.currentTimeMillis() > TimeUtil.getGraduateTime(enrollmentYear).getTime();
     }
 
     private String getStuGrade(Date enrollmentYear) {
@@ -457,6 +463,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return String.valueOf(stuYear);
     }
 
+    /**
+     * 根据入学时间推断学生的年份， 弃用
+     * @param month
+     * @param currentYear
+     * @return
+     */
     private int getStuYear(int month, int currentYear) {
         if (month >= 4 && month <= 12) {
             currentYear = currentYear - 1;

@@ -1,6 +1,7 @@
 package com.ailab.ailabsystem.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
@@ -82,6 +83,9 @@ public class FileController {
     @ApiOperation(value = "上传图片", notes = "上传用户头像")
     @PostMapping("/getImageUrl")
     public R uploadImage(@RequestParam("file") MultipartFile image) {
+        if (ObjectUtil.isNull(image)) {
+            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+        }
         try {
             // 获取原始文件名称
             String originalFilename = image.getOriginalFilename();

@@ -13,25 +13,25 @@ import java.io.InputStream;
  */
 public class MD5Util {
 
+    public static final String SALT = "nfsn";
+
+//    /**
+//     * 随机盐生成MD5
+//     * @param password
+//     * @return
+//     */
+//    public static String encodeByMD5(String password) {
+//        // 生成随机盐
+//        String salt = RandomStringUtils.randomAscii(12);
+//        return encodeByMD5(salt, password);
+//    }
+
     /**
-     * 随机盐生成MD5
      * @param password
      * @return
      */
     public static String encodeByMD5(String password) {
-        // 生成随机盐
-        String salt = RandomStringUtils.randomAscii(12);
-        return encodeByMD5(salt, password);
-    }
-
-    /**
-     * 指定盐生成MD5
-     * @param salt
-     * @param password
-     * @return
-     */
-    public static String encodeByMD5(String salt, String password) {
-        return DigestUtils.md5DigestAsHex((salt + password).getBytes());
+        return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
     }
 
     /**
@@ -46,7 +46,7 @@ public class MD5Util {
     }
 
     public static void main(String[] args) {
-        String md5 = encodeByMD5("sdf234gse342", "123");
-        System.out.println(md5);
+//        String md5 = encodeByMD5("sdf234gse342", "123");
+//        System.out.println(md5);
     }
 }

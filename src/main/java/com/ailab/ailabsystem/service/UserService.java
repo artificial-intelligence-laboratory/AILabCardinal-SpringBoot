@@ -23,7 +23,7 @@ public interface UserService extends IService<User> {
      * @param loginRequest 登录参数
      * @return 用户信息和token
      */
-    R<Object> login(LoginRequest loginRequest);
+    R<Object> login(HttpServletRequest request, LoginRequest loginRequest);
 
     /**
      * 获取所有学生信息列表
@@ -56,7 +56,7 @@ public interface UserService extends IService<User> {
 
     R getInfoOfMe(String loginUserKey);
 
-    R getInfoById(Long userId);
+    R getInfoVoById(Long userId);
 
     R updateMyInfo(UserInfoDTO userInfoDTO, String token);
 
