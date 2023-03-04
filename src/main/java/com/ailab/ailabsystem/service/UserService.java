@@ -56,7 +56,7 @@ public interface UserService extends IService<User> {
 
     R getInfoOfMe(String loginUserKey);
 
-    R getInfoById(Long userId);
+    R getInfoVoById(Long userId);
 
     R updateMyInfo(UserInfoDTO userInfoDTO, String token);
 

@@ -1,4 +1,4 @@
-package com.ailab.ailabsystem.common;
+package com.ailab.ailabsystem.constants;
 
 /**
  * @author xiaozhi
@@ -62,6 +62,13 @@ public class RedisKey {
      *实验室信息区key
      */
     public static final String INDEX_LAB_KEY = "lab:index:info";
+
+    /**
+     * 用户登录凭证
+     * @param token
+     * @return
+     */
+    public static final String LOGIN_UNIQUE_TOKEN = "login:token";
 
     public static String getLoginUserKey(String token) {
         return LOGIN_USER + SPLIT + token;
@@ -130,6 +137,13 @@ public class RedisKey {
      */
     public static String getPreSimpleUserInfos() {
         return SIMPLE_USER_INFOS;
+    }
+
+    /**
+     * 获取用户登录凭证
+     */
+    public static String getUserLoginToken(String studentNumber) {
+        return LOGIN_UNIQUE_TOKEN + SPLIT + studentNumber;
     }
 
 }

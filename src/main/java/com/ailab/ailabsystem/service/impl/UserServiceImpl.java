@@ -3,12 +3,11 @@ package com.ailab.ailabsystem.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserStatus;
 import com.ailab.ailabsystem.exception.CustomException;
@@ -23,17 +22,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,16 +67,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //获取用户学号密码
         String studentNumber = loginRequest.getStudentNumber();
         String password = loginRequest.getPassword();
-        //先从redis获取登录时存放的userVo
-        String userVoStr = redis.get(RedisKey.getLoginUserKey(RequestUtil.getAuthorization(request)));
-        //非空判断
-        if (StrUtil.isNotBlank(userVoStr)) {
-            UserVo userVo = JSONUtil.toBean(userVoStr, UserVo.class);
-            //用学号做比较用户是否登录
-            if (UserHolder.getUser() != null || studentNumber.equals(userVo.getStudentNumber())) {
-                throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
-            }
-        }
         String safePassword = MD5Util.encodeByMD5(password);
         User userLogin = userMapper.selectByStuNumAndPwd(studentNumber, safePassword);
         if (ObjectUtil.isNull(userLogin)) {
@@ -92,16 +78,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 登录成功，生成随机token
         String token = UUID.randomUUID().toString().replace("-", "");
+        String loginTokenKey = RedisKey.getUserLoginToken(studentNumber);
+        String loginToken = redis.get(loginTokenKey);
+        if (StrUtil.isNotBlank(loginToken)) {
+            throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
+        }
         UserVo userVo = BeanUtil.copyProperties(userLogin, UserVo.class);
         userVo.setNickname(userLogin.getUserInfo().getRealName());
-        UserHolder.saveUser(userVo);
         // 获取redis key
         String loginUserKey = RedisKey.getLoginUserKey(token);
-        // 存入redis
+        // 将userVo存入redis
         redis.set(loginUserKey, JSONUtil.toJsonStr(userVo), CommonConstant.ONE_WEEK);
+        //将用户登录token存入redis
+        redis.set(loginTokenKey, token, CommonConstant.ONE_WEEK);
         HashMap<String, Object> map = new HashMap<>();
-        map.put("token", token);
-        map.put("user", userVo);
         return R.success(map);
     }
 
@@ -262,7 +252,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             //注意，这里查询的是原始的userInfo，并非响应给前端的userInfoVo
             userInfo = getUserInfoByUserId(userId);
             //利用userInfo转化为userInfoVo信息
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
+
+            log.info(String.valueOf(userInfo));
+            log.info(String.valueOf(userInfoVo));
+
             String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
             redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
         } else {
@@ -290,7 +285,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public R getInfoById(Long userId) {
+    public R getInfoVoById(Long userId) {
         //先尝试从redis获取userInfo信息
         String userInfoJson = redis.get(RedisKey.getUserInfo(userId));
         UserInfo userInfo = new UserInfo();
@@ -298,7 +293,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StrUtil.isBlank(userInfoJson)) {
             QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_id", userId);
+            User user = this.getById(userId);
             userInfo = userInfoMapper.selectOne(queryWrapper);
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
             redis.set(RedisKey.getUserInfo(userId), JSONUtil.toJsonStr(userInfoVo), 60 * 30);
         } else {

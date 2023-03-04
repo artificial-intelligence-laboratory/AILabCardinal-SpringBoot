@@ -9,7 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.dto.SingInRequest;
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author xiaozhi
@@ -175,7 +173,7 @@ public class UserController {
     @GetMapping("/Info/of/id")
     public R getInfoOfId(Long userId) {
         CheckDataUtil.checkId(userId);
-        return userService.getInfoById(userId);
+        return userService.getInfoVoById(userId);
     }
 
     @ApiOperation(value = "新增个人信息", notes = "侧边栏中的新增信息")

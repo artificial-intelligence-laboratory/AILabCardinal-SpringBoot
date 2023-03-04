@@ -10,6 +10,7 @@
         <result property="password" column="password"/>
         <result property="avatar" column="avatar"/>
         <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
         <result property="userRight" column="user_right"/>
         <result property="lastOnlineIp" column="lastOnlineIp"/>
         <result property="lastOnlineIpAddress" column="last_online_ip_address"/>
@@ -37,6 +38,7 @@
                u.`password`,
                u.avatar,
                u.email,
+               u.phone,
                u.user_right,
                u.user_status,
                ui.user_info_id uiid,

@@ -1,17 +1,12 @@
 package com.ailab.ailabsystem.controller;
 
-import cn.hutool.core.util.StrUtil;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
-import com.ailab.ailabsystem.enums.ResponseStatusEnum;
-import com.ailab.ailabsystem.exception.CustomException;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
-import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.CheckDataUtil;
 import com.ailab.ailabsystem.util.RedisOperator;
 import com.ailab.ailabsystem.util.RequestUtil;
-import com.ailab.ailabsystem.util.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 /**
  * @author xiaozhi

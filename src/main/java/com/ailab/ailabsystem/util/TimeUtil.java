@@ -41,14 +41,15 @@ public class TimeUtil {
 
     public static Date getGraduateTime(String year){
 
+        Date date = new Date();
         try {
             SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd ");
             String graduateTime = year + GRADUATE_MONTH_DAY;
-            return formatter.parse(graduateTime);
+            date = formatter.parse(graduateTime);
         } catch (ParseException e) {
             log.error("转换时间错误");
         }
-        return null;
+        return date;
     }
 
     /**

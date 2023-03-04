@@ -15,12 +15,12 @@ import javax.annotation.Resource;
  * @create 2022-11-2022/11/12 10:45
  */
 @Configuration
-public class Interceptors implements WebMvcConfigurer {
+public class InterceptorConfig implements WebMvcConfigurer {
 
-    @Autowired
+    @Resource
     private LoginInterceptor loginInterceptor;
 
-    @Autowired
+    @Resource
     private RefreshTokenInterceptor refreshTokenInterceptor;
 
     @Override
@@ -35,8 +35,7 @@ public class Interceptors implements WebMvcConfigurer {
                 ).order(1);
         registry.addInterceptor(refreshTokenInterceptor)
                 .addPathPatterns(
-                        "/user/getIndexUserInfo",
-                        "/lab/getLabInfo"
+                        "/**"
                 ).order(0);
     }
 }

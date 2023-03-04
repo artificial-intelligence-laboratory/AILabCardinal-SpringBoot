@@ -1,7 +1,5 @@
 package com.ailab.ailabsystem.interceptor;
 
-import cn.hutool.json.JSONUtil;
-import com.ailab.ailabsystem.common.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.entity.User;
@@ -9,10 +7,8 @@ import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.IPUtil;
 import com.ailab.ailabsystem.util.RedisOperator;
-import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -40,18 +36,9 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-        String token = RequestUtil.getAuthorization(request);
-        // 未登录
-        if (StringUtils.isBlank(token)) {
+        if (UserHolder.getUser() == null) {
             throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
         }
-        String userJson = redis.get(RedisKey.getLoginUserKey(token));
-        // 会话过期
-        if (StringUtils.isBlank(userJson)) {
-            throw new CustomException(ResponseStatusEnum.SESSION_EXPIRE);
-        }
-        UserVo userVo = JSONUtil.toBean(userJson, UserVo.class);
-        UserHolder.saveUser(userVo);
         return true;
     }
 

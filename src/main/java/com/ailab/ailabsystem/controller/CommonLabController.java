@@ -3,15 +3,11 @@ package com.ailab.ailabsystem.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.common.RedisKey;
+import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.mapper.AwardMapper;
 import com.ailab.ailabsystem.mapper.ProjectMemberMapper;
-import com.ailab.ailabsystem.model.entity.Award;
-import com.ailab.ailabsystem.model.entity.Project;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.vo.IndexAiLabInfo;
-import com.ailab.ailabsystem.service.AwardService;
-import com.ailab.ailabsystem.service.ProjectService;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.RedisOperator;
 import io.swagger.annotations.Api;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Api(value = "实验室信息接口", tags = "实验室信息接口")
