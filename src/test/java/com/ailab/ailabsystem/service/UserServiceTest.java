@@ -23,13 +23,13 @@ public class UserServiceTest {
     @Resource
     private RedisOperator redis;
 
-    @Test
-    public void testGetUserInfo(){
-        Map<String, List<UserInfoVo>> userInfo = userService.getUserInfoList();
-        for (Map.Entry<String, List<UserInfoVo>> entry : userInfo.entrySet()) {
-            System.out.println(entry.getKey() + "：" + entry.getValue());
-        }
-    }
+//    @Test
+//    public void testGetUserInfo(){
+//        Map<String, List<UserInfoVo>> userInfo = userService.getUserInfoList();
+//        for (Map.Entry<String, List<UserInfoVo>> entry : userInfo.entrySet()) {
+//            System.out.println(entry.getKey() + "：" + entry.getValue());
+//        }
+//    }
 
     @Test
     public void test(){

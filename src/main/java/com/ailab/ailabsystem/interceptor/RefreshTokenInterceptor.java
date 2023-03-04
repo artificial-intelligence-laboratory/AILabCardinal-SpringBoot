@@ -17,6 +17,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.ailab.ailabsystem.constants.RedisConstants.LOGIN_UNIQUE_TOKEN;
+
 @Component
 public class RefreshTokenInterceptor implements HandlerInterceptor {
 
@@ -41,7 +43,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         // 4.将查询到的hash数据转为UserVo
         UserVo userVo = JSONUtil.toBean(userStr, UserVo.class);
         UserHolder.saveUser(userVo);
-        String userLoginTokenKey = RedisKey.getUserLoginToken(userVo.getStudentNumber());
+        String userLoginTokenKey = LOGIN_UNIQUE_TOKEN + userVo.getStudentNumber();
         //获取redis存放的token，与前端传进来的进行对比，看是否一致
         String loginToken = redis.get(userLoginTokenKey);
         //判断token是否一致

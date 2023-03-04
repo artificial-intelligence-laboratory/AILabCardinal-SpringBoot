@@ -25,18 +25,18 @@ public interface UserService extends IService<User> {
      */
     R<Object> login(HttpServletRequest request, LoginRequest loginRequest);
 
-    /**
-     * 获取所有学生信息列表
-     * @return 本届和往届的学生列表
-     */
-    Map<String, List<UserInfoVo>> getUserInfoList();
+//    /**
+//     * 获取所有学生信息列表
+//     * @return 本届和往届的学生列表
+//     */
+//    Map<String, List<UserInfoVo>> getUserInfoList();
 
-    /**
-     * 获取单个学生信息
-     * @param userInfoId    用户信息表id
-     * @return
-     */
-    UserInfo getUserInfo(Integer userInfoId);
+//    /**
+//     * 获取单个学生信息
+//     * @param userInfoId    用户信息表id
+//     * @return
+//     */
+//    UserInfo getUserInfo(Integer userInfoId);
 
     UserInfo getUserInfoByUserId(Long userId);
 

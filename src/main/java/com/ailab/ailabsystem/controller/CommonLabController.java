@@ -20,6 +20,8 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ailab.ailabsystem.constants.RedisKey.INDEX_LAB_KEY;
+
 @Api(value = "实验室信息接口", tags = "实验室信息接口")
 @RestController
 @RequestMapping("/lab")
@@ -40,7 +42,7 @@ public class CommonLabController {
     @ApiOperation(value = "获取实验室的基本信息", notes = "用于获取首页的实验室信息区")
     @GetMapping("/getLabInfo")
     public R getLabInfo() {
-        String labInfoJson = redis.get(RedisKey.INDEX_LAB_KEY);
+        String labInfoJson = redis.get(INDEX_LAB_KEY);
         if (StrUtil.isNotBlank(labInfoJson)) {
             return R.success(JSONUtil.toBean(labInfoJson, IndexAiLabInfo.class));
         }
@@ -54,7 +56,7 @@ public class CommonLabController {
         aiLabInfo.setProjectCount(projectMemberMapper.getLabProjectCount());
         aiLabInfo.setAwardCount(awardMapper.getLabAwardCount());
         String labInfoJsonStr = JSONUtil.toJsonStr(aiLabInfo);
-        redis.set(RedisKey.getIndexAiLabInfo(), labInfoJsonStr, 60 * 30);
+        redis.set(INDEX_LAB_KEY, labInfoJsonStr, 60 * 30);
         return R.success(aiLabInfo);
     }
 }

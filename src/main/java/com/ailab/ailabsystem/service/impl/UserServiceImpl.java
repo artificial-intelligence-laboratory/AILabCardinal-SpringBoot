@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
+import com.ailab.ailabsystem.constants.RedisConstants;
 import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserStatus;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+
+import static com.ailab.ailabsystem.constants.RedisConstants.*;
 
 @Slf4j
 @Service
@@ -78,7 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 登录成功，生成随机token
         String token = UUID.randomUUID().toString().replace("-", "");
-        String loginTokenKey = RedisKey.getUserLoginToken(studentNumber);
+        String loginTokenKey = LOGIN_UNIQUE_TOKEN + studentNumber;
         String loginToken = redis.get(loginTokenKey);
         if (StrUtil.isNotBlank(loginToken)) {
             throw new CustomException(ResponseStatusEnum.EXISTS_ERROR);
@@ -91,47 +94,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redis.set(loginUserKey, JSONUtil.toJsonStr(userVo), CommonConstant.ONE_WEEK);
         //将用户登录token存入redis
         redis.set(loginTokenKey, token, CommonConstant.ONE_WEEK);
-        HashMap<String, Object> map = new HashMap<>();
-        return R.success(map);
+        return R.success(token);
     }
 
-    @Override
-    public Map<String, List<UserInfoVo>> getUserInfoList() {
-        // 查缓存
-        String userInfoVoListJson = redis.get(RedisKey.getUserInfos());
-        List<UserInfoVo> userInfoVos = new ArrayList<>();
-        if (StringUtils.isNotBlank(userInfoVoListJson)) {
-            userInfoVos = JSONUtil.toList(userInfoVoListJson, UserInfoVo.class);
-        } else {
-            // 查询所有学生信息
-            List<UserInfo> userInfos = userInfoMapper.selectList(null);
-            userInfoVos = userInfoToVoList(userInfos);
-            redis.set(RedisKey.getUserInfos(), JSONUtil.toJsonStr(userInfoVos), 60 * 5);
-        }
-
-        return studentClassification(userInfoVos);
-    }
-
-    private Map<String, List<UserInfoVo>> studentClassification(List<UserInfoVo> userInfoVos) {
-        // 因为只有两个，分别是本届和往届，所以直接实例化为2
-        HashMap<String, List<UserInfoVo>> map = new HashMap<>(2);
-        List<UserInfoVo> currentStudents = new ArrayList<>();
-        List<UserInfoVo> previousStudents = new ArrayList<>();
-        userInfoVos.forEach(userInfoVo -> {
-            UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
-            if (currentOrPrevious(userInfo.getEnrollmentYear())) {
-                previousStudents.add(userInfoVo);
-            } else {
-                 //获取年级
-                String stuGrade = userInfo.getEnrollmentYear();
-                userInfoVo.setGrade(stuGrade);
-                currentStudents.add(userInfoVo);
-            }
-        });
-        map.put(CommonConstant.CURRENT_STUDENTS, currentStudents);
-        map.put(CommonConstant.PREVIOUS_STUDENTS, previousStudents);
-        return map;
-    }
+//
+//    @Override
+//    public Map<String, List<UserInfoVo>> getUserInfoList() {
+//        // 查缓存
+//        String userInfoVoListJson = redis.get(RedisKey.getUserInfos());
+//        List<UserInfoVo> userInfoVos = new ArrayList<>();
+//        if (StringUtils.isNotBlank(userInfoVoListJson)) {
+//            userInfoVos = JSONUtil.toList(userInfoVoListJson, UserInfoVo.class);
+//        } else {
+//            // 查询所有学生信息
+//            List<UserInfo> userInfos = userInfoMapper.selectList(null);
+//            userInfoVos = userInfoToVoList(userInfos);
+//            redis.set(RedisKey.getUserInfos(), JSONUtil.toJsonStr(userInfoVos), 60 * 5);
+//        }
+//
+//        return studentClassification(userInfoVos);
+//    }
+//
+//    private Map<String, List<UserInfoVo>> studentClassification(List<UserInfoVo> userInfoVos) {
+//        // 因为只有两个，分别是本届和往届，所以直接实例化为2
+//        HashMap<String, List<UserInfoVo>> map = new HashMap<>(2);
+//        List<UserInfoVo> currentStudents = new ArrayList<>();
+//        List<UserInfoVo> previousStudents = new ArrayList<>();
+//        userInfoVos.forEach(userInfoVo -> {
+//            UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
+//            if (currentOrPrevious(userInfo.getEnrollmentYear())) {
+//                previousStudents.add(userInfoVo);
+//            } else {
+//                 //获取年级
+//                String stuGrade = userInfo.getEnrollmentYear();
+//                userInfoVo.setGrade(stuGrade);
+//                currentStudents.add(userInfoVo);
+//            }
+//        });
+//        map.put(CommonConstant.CURRENT_STUDENTS, currentStudents);
+//        map.put(CommonConstant.PREVIOUS_STUDENTS, previousStudents);
+//        return map;
+//    }
 
     /**
      * @author huiyuan
@@ -161,13 +164,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return map;
     }
 
-    @Override
-    public UserInfo getUserInfo(Integer userInfoId) {
-        QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
-        wrapper.eq("user_info_id", userInfoId);
-        UserInfo userInfo = userInfoMapper.selectOne(wrapper);
-        return userInfo;
-    }
+//    @Override
+//    public UserInfo getUserInfo(Integer userInfoId) {
+//        QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
+//        wrapper.eq("user_info_id", userInfoId);
+//        UserInfo userInfo = userInfoMapper.selectOne(wrapper);
+//        return userInfo;
+//    }
 
     @Override
     public UserInfo getUserInfoByUserId(Long userId) {
@@ -186,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //注意上面查的是登录用户的信息（User），而下面查的是用户的首页信息（IndexUserInfo）
         //先查redis的首页用户
-        String indexUserKey = RedisKey.getIndexUser(userId);
+        String indexUserKey = INDEX_USER_INFO + userId;
         String resultUserJson = redis.get(indexUserKey);
         if (StrUtil.isNotBlank(resultUserJson)) {
             return R.success(JSONUtil.toBean(resultUserJson, IndexUserVo.class));
@@ -236,97 +239,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public R getInfoOfMe(String loginUserKey) {
         //先从redis获取登录用户的信息
-        String userJson = redis.get(loginUserKey);
-        if (StrUtil.isBlank(userJson)) {
+        String userJsonStr = redis.get(loginUserKey);
+        if (StrUtil.isBlank(userJsonStr)) {
             throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
         }
-        User user = JSONUtil.toBean(userJson, User.class);
+        User user = JSONUtil.toBean(userJsonStr, User.class);
         Long userId = user.getUserId();
         //查redis看是否存在userInfoVo信息
-        String userInfoKey = RedisKey.getUserInfo(userId);
-        String userInfoJson = redis.get(userInfoKey);
+        String userDetailsJsonStr = redis.get(USER_DETAILS_KEY + userId);
         UserInfo userInfo = new UserInfo();
         UserInfoVo userInfoVo = new UserInfoVo();
+        UserDetailsVo userDetailsVo = new UserDetailsVo();
         //不存在则查询数据库
-        if (StrUtil.isBlank(userInfoJson)) {
+        if (StrUtil.isBlank(userDetailsJsonStr)) {
             //注意，这里查询的是原始的userInfo，并非响应给前端的userInfoVo
             userInfo = getUserInfoByUserId(userId);
             //利用userInfo转化为userInfoVo信息
             userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
-
-            log.info(String.valueOf(userInfo));
-            log.info(String.valueOf(userInfoVo));
-
-            String userInfoVoJsonStr = JSONUtil.toJsonStr(userInfoVo);
-            redis.set(userInfoKey, userInfoVoJsonStr, 60 * 30);
+            List<ProjectVo> userProjectVos = getUserProjectVos(userId);
+            List<AwardVo> userAwardVos = getUserAwardVos(userId);
+            userDetailsVo.setUserInfoVo(userInfoVo);
+            userDetailsVo.setAwardVos(userAwardVos);
+            userDetailsVo.setProjectVos(userProjectVos);
+            userDetailsJsonStr = JSONUtil.toJsonStr(userDetailsVo);
+            redis.set(USER_DETAILS_KEY + userId, userDetailsJsonStr, USER_DETAILS__TTL);
         } else {
             //存在则直接把JSON转化为实体类
-            userInfoVo = JSONUtil.toBean(userInfoJson, UserInfoVo.class);
+            userDetailsVo = JSONUtil.toBean(userDetailsJsonStr, UserDetailsVo.class);
         }
-        //获取与用户相关的项目
-        String userProjectKey = RedisKey.getUserProject(userId);
-        String userProjectJson = redis.get(userProjectKey);
-        List<ProjectVo> userProjectVos = new ArrayList<>();
-        if (StrUtil.isBlank(userProjectJson)) {
-            userProjectVos = getUserProjectVos(userInfo.getUserId());
-            String userProjectJsonStr = JSONUtil.toJsonStr(userProjectVos);
-            redis.set(userProjectKey, userProjectJsonStr, 60 * 30);
-        } else {
-            userProjectVos = JSONUtil.toList(userProjectJson, ProjectVo.class);
-        }
-        List<AwardVo> userAwardVos = getUserAwardVos(userId);
-        Map<String, Object> map = new HashMap<>();
-        map.put("userInfoVo", userInfoVo);
-        map.put("userProjectVos", userProjectVos);
-        map.put("userAwardVos", userAwardVos);
-
-        return R.success(map);
+        return R.success(userDetailsVo);
     }
 
     @Override
     public R getInfoVoById(Long userId) {
         //先尝试从redis获取userInfo信息
-        String userInfoJson = redis.get(RedisKey.getUserInfo(userId));
+        String userDetailsJsonStr = redis.get(USER_DETAILS_KEY + userId);
         UserInfo userInfo = new UserInfo();
         UserInfoVo userInfoVo = new UserInfoVo();
-        if (StrUtil.isBlank(userInfoJson)) {
+        UserDetailsVo userDetailsVo = new UserDetailsVo();
+        if (StrUtil.isBlank(userDetailsJsonStr)) {
             QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_id", userId);
             User user = this.getById(userId);
             userInfo = userInfoMapper.selectOne(queryWrapper);
             userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
-            redis.set(RedisKey.getUserInfo(userId), JSONUtil.toJsonStr(userInfoVo), 60 * 30);
+            //获取与用户相关的项目
+            List<ProjectVo> userProjectVos = getUserProjectVos(userId);
+            //获取与用户相关的奖项
+            List<AwardVo> userAwardVos = getUserAwardVos(userId);
+            userDetailsVo.setUserInfoVo(userInfoVo);
+            userDetailsVo.setAwardVos(userAwardVos);
+            userDetailsVo.setProjectVos(userProjectVos);
+            String userDetailsVoJsonStr = JSONUtil.toJsonStr(userDetailsVo);
+            redis.set(USER_DETAILS_KEY + userId, userDetailsVoJsonStr, USER_DETAILS__TTL);
         } else {
             //存在则直接把JSON转化为实体类
-            userInfoVo = JSONUtil.toBean(userInfoJson, UserInfoVo.class);
+            userDetailsVo = JSONUtil.toBean(userDetailsJsonStr, UserDetailsVo.class);
         }
-        //获取与用户相关的项目
-        String userProjectKey = RedisKey.getUserProject(userId);
-        String userProjectJson = redis.get(userProjectKey);
-        List<ProjectVo> userProjectVos = new ArrayList<>();
-        if (StrUtil.isBlank(userProjectJson)) {
-            userProjectVos = getUserProjectVos(userId);
-            String userProjectJsonStr = JSONUtil.toJsonStr(userProjectVos);
-            redis.set(userProjectKey, userProjectJsonStr, 60 * 30);
-        } else {
-            userProjectVos = JSONUtil.toList(userProjectJson, ProjectVo.class);
-        }
-        List<AwardVo> userAwardVos = getUserAwardVos(userId);
-        Map<String, Object> map = new HashMap<>();
-        map.put("userInfoVo", userInfoVo);
-        map.put("userProjectVos", userProjectVos);
-        map.put("userAwardVos", userAwardVos);
-
-        return R.success(map);
+        return R.success(userDetailsVo);
     }
 
     @Transactional
     @Override
     public R updateMyInfo(UserInfoDTO userInfoDTO,  String token) {
-        //校验前端传的数据
-        CheckDataUtil.checkUserInfoDTO(userInfoDTO);
         //从数据库中获取userInfo
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfo::getUserInfoId, userInfoDTO.getUserInfoId());
@@ -340,8 +317,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfoMapper.updateById(userInfo);
         User user = this.getById(userInfo.getUserId());
         UserVo userVo = BeanUtil.copyProperties(user, UserVo.class);
-        redis.set(RedisKey.getLoginUserKey(token), JSONUtil.toJsonStr(userVo), 60 * 30);
-        redis.del(RedisKey.getUserInfo(userInfo.getUserId()));
+        redis.set(USER_VO_KEY + token, JSONUtil.toJsonStr(userVo), USER_VO_TTL);
+        redis.del(USER_DETAILS_KEY + user.getUserId());
         log.info("用户信息{}",userInfo);
         return R.success();
     }
@@ -355,13 +332,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = this.getById(userId);
         UserVo userVo = BeanUtil.copyProperties(user, UserVo.class);
         String userVoJson = JSONUtil.toJsonStr(userVo);
-        redis.set(RedisKey.getLoginUserKey(token),userVoJson);
+        redis.set(USER_VO_KEY + token,userVoJson);
         return R.success();
     }
 
     @Override
     public R getSimpleUserInfoList() {
-        String userInfoVosJson = redis.get(RedisKey.getUserInfos());
+        String userInfoVosJson = redis.get(SIMPLE_USER_INFOS);
         List<UserInfo> userInfoList = new ArrayList<>();
         List<UserInfoVo> userInfoVos = new ArrayList<>();
         Map<String, List<UserSimpleVo>> map = new HashMap<>();
@@ -371,7 +348,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             userInfoList = userInfoMapper.selectList(null);
             userInfoVos = userInfoToVoList(userInfoList);
-            redis.set(RedisKey.getUserInfos(), JSONUtil.toJsonStr(userInfoVos), 60 * 5);
+            redis.set(SIMPLE_USER_INFOS, JSONUtil.toJsonStr(userInfoVos), SIMPLE_USER_INFOS_TTL);
         }
         map = studentClassification2(userInfoVos);
 
