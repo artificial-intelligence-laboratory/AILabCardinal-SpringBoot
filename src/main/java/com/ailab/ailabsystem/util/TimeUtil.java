@@ -59,6 +59,9 @@ public class TimeUtil {
 //        }
         Date date = null;
         String format = "yyyy-MM-dd";
+        Integer integer = Integer.valueOf(year);
+        integer = integer + 4;
+        year = String.valueOf(integer);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalDate localDate = LocalDate.parse(year + GRADUATE_MONTH_DAY, formatter);
         date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());

@@ -148,6 +148,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfoVos.forEach(userInfoVo -> {
             UserSimpleVo userSimpleVo = BeanUtil.copyProperties(userInfoVo, UserSimpleVo.class);
             User user = userMapper.selectById(userSimpleVo.getUserId());
+            if (user.getUserId() == 1) {
+                return;
+            }
             userSimpleVo.setUserRight(user.getUserRight());
             userSimpleVo.setAvatar(user.getAvatar());
             UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
@@ -255,8 +258,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             //注意，这里查询的是原始的userInfo，并非响应给前端的userInfoVo
             userInfo = getUserInfoByUserId(userId);
             //利用userInfo转化为userInfoVo信息
-            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             List<ProjectVo> userProjectVos = getUserProjectVos(userId);
             List<AwardVo> userAwardVos = getUserAwardVos(userId);
             userDetailsVo.setUserInfoVo(userInfoVo);
@@ -283,8 +286,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             queryWrapper.eq("user_id", userId);
             User user = this.getById(userId);
             userInfo = userInfoMapper.selectOne(queryWrapper);
-            userInfoVo.setStudentNumber(user.getStudentNumber());
             userInfoVo = getUserInfoVo(userInfo);
+            userInfoVo.setStudentNumber(user.getStudentNumber());
             //获取与用户相关的项目
             List<ProjectVo> userProjectVos = getUserProjectVos(userId);
             //获取与用户相关的奖项
@@ -336,6 +339,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return R.success();
     }
 
+    /**
+     * 查询成员列表
+     * @return
+     */
     @Override
     public R getSimpleUserInfoList() {
         String userInfoVosJson = redis.get(SIMPLE_USER_INFOS);
@@ -389,6 +396,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //todo 查询用户专利数量
 
         //给indexUserVo属性赋值
+        indexUserVo.setAvatar(userVo.getAvatar());
+        indexUserVo.setRealName(userVo.getNickname());
         indexUserVo.setProjectCount(projectCount);
         indexUserVo.setCompetitionCount(competitionCount);
         indexUserVo.setAwardCount(awardCount);
@@ -422,7 +431,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (enrollmentYear == null) {
             throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
         }
-        return System.currentTimeMillis() > TimeUtil.getGraduateTime(enrollmentYear).getTime();
+        long millis = System.currentTimeMillis();
+        long time = TimeUtil.getGraduateTime(enrollmentYear).getTime();
+        return millis > time;
     }
 
     private String getStuGrade(Date enrollmentYear) {

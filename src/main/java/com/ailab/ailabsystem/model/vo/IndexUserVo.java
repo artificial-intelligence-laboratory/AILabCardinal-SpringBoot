@@ -41,4 +41,14 @@ public class IndexUserVo implements Serializable {
      * 专利数量;
      */
     private Integer patentNumber;
+
+    /**
+     *  头像
+     */
+    private String avatar;
+
+    /**
+     * 用户名
+     */
+    private String realName;
 }

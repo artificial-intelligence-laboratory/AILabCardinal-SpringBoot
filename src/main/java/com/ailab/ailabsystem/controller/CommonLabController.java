@@ -52,7 +52,7 @@ public class CommonLabController {
         userList = userList.stream().filter(user -> {
             return user.getUserRight() == 2 || user.getUserRight() == 3;
         }).collect(Collectors.toList());
-        aiLabInfo.setMemberCount(userList.size());
+        aiLabInfo.setMemberCount(userList.size() - 1);
         aiLabInfo.setProjectCount(projectMemberMapper.getLabProjectCount());
         aiLabInfo.setAwardCount(awardMapper.getLabAwardCount());
         String labInfoJsonStr = JSONUtil.toJsonStr(aiLabInfo);
