@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.ailab.ailabsystem.constants.RedisConstants.*;
+
 /**
  * @author xiaozhi
  * @description 用户服务controller
@@ -68,7 +70,7 @@ public class UserController {
     public R<Object> isSingIn() {
         UserVo userVo = UserHolder.getUser();
         // 判断是否已经签到
-        if (redis.keyIsExist(RedisKey.getUserSignIn(userVo.getUserId()))) {
+        if (redis.keyIsExist(USER_SIGN_IN + userVo.getUserId())) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         return R.success();
@@ -93,13 +95,13 @@ public class UserController {
         UserVo userVo = UserHolder.getUser();
         User user = userService.getById(userVo.getUserId());
         // 判断是否已经签到
-        if (redis.keyIsExist(RedisKey.getUserSignIn(user.getUserId()))) {
+        if (redis.keyIsExist(USER_SIGN_IN + user.getUserId())) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         // 获取签出时间
         Date checkOutTime = getCheckOutTime(time, currentTime, CommonConstant.MAX_CHECKOUT_TIME);
         long addTime = TimeUtil.getAddTime(currentTime, checkOutTime);
-        redis.set(RedisKey.getUserSignIn(user.getUserId()), "1", addTime);
+        redis.set(USER_SIGN_IN + user.getUserId(), "1", addTime);
 
         InOutRegistration inOutRegistration = new InOutRegistration();
         inOutRegistration.setTask(task);
@@ -135,37 +137,37 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "获取所有学生信息接口", notes = "获取所有学生信息接口")
-    @GetMapping("/getStuInfoList")
-    public R getStuInfoList() {
-        Map<String, List<UserInfoVo>> userInfos = userService.getUserInfoList();
-        return R.success(userInfos);
-    }
+//    @ApiOperation(value = "获取所有学生信息接口", notes = "获取所有学生信息接口")
+//    @GetMapping("/getStuInfoList")
+//    public R getStuInfoList() {
+//        Map<String, List<UserInfoVo>> userInfos = userService.getUserInfoList();
+//        return R.success(userInfos);
+//    }
+//
+//    @ApiOperation(value = "获取单个学生信息", notes = "获取单个学生信息")
+//    @GetMapping("/getStuInfo")
+//    public R getStuInfo(Integer userInfoId) {
+//        if (ObjectUtils.isEmpty(userInfoId)) {
+//            throw new CustomException(ResponseStatusEnum.FAILED);
+//        }
+//        UserInfo userInfo = userService.getUserInfo(userInfoId);
+//        return R.success(userInfo);
+//    }
 
-    @ApiOperation(value = "获取单个学生信息", notes = "获取单个学生信息")
-    @GetMapping("/getStuInfo")
-    public R getStuInfo(Integer userInfoId) {
-        if (ObjectUtils.isEmpty(userInfoId)) {
-            throw new CustomException(ResponseStatusEnum.FAILED);
-        }
-        UserInfo userInfo = userService.getUserInfo(userInfoId);
-        return R.success(userInfo);
-    }
-
-    @ApiOperation(value = "获取学生的首页信息", notes = "用于获取学生首页的基本信息")
+    @ApiOperation(value = "获取自己的首页信息", notes = "用于获取自己首页的基本信息")
     @GetMapping("/getIndexUserInfo")
     public R getIndexUserInfo(HttpServletRequest request) {
         //获取用户登录凭证token
         String token = RequestUtil.getAuthorization(request);
-        String loginUserKey = RedisKey.getLoginUserKey(token);
+        String loginUserKey = USER_VO_KEY + token;
         return userService.getIndexUserInfo(loginUserKey);
     }
 
     @ApiOperation(value = "获取自己的详情信息", notes = "获取首页侧边栏中的我的信息")
     @GetMapping("/Info/of/me")
     public R getInfoOfMe(HttpServletRequest request) {
-        String authorization = RequestUtil.getAuthorization(request);
-        String loginUserKey = RedisKey.getLoginUserKey(authorization);
+        String token = RequestUtil.getAuthorization(request);
+        String loginUserKey = USER_VO_KEY + token;
         return userService.getInfoOfMe(loginUserKey);
     }
 
@@ -187,6 +189,8 @@ public class UserController {
         if (userInfoDTO == null) {
             throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
         }
+        //校验前端传的数据
+        CheckDataUtil.checkUserInfoDTO(userInfoDTO);
         return userService.updateMyInfo(userInfoDTO, token);
     }
 
@@ -212,7 +216,7 @@ public class UserController {
         }
         UserVo userVo = BeanUtil.copyProperties(user, UserVo.class);
         String userVoJson = JSONUtil.toJsonStr(userVo);
-        redis.set(RedisKey.getLoginUserKey(token),userVoJson);
+        redis.set(USER_VO_KEY + token,userVoJson);
         return R.success(userVo);
     }
 
@@ -230,7 +234,7 @@ public class UserController {
         }
         String emailCode = RandomUtil.randomNumbers(6);
         SEND_EMAIL_EXECUTOR.submit(new HandleSendEmail(email, emailCode));
-        redis.set(RedisKey.getEmailCode(userId), emailCode, 60 * 5);
+        redis.set(EMAIL_CODE + userId, emailCode, 60 * 5);
         return R.success();
     }
 
@@ -238,12 +242,12 @@ public class UserController {
     @PutMapping("/bind/email")
     public R bindEmail(HttpServletRequest request, String email, String code) {
         String token = RequestUtil.getAuthorization(request);
-        String userVoJson = redis.get(RedisKey.getLoginUserKey(token));
-        if (userVoJson == null) {
+        String userVoJson = redis.get(USER_VO_KEY + token);
+        if (StrUtil.isBlank(userVoJson)) {
             throw new CustomException(ResponseStatusEnum.NOT_LOGIN_ERROR);
         }
         UserVo userVo = JSONUtil.toBean(userVoJson, UserVo.class);
-        String emailCOde = redis.get(RedisKey.getEmailCode(userVo.getUserId()));
+        String emailCOde = redis.get(EMAIL_CODE + userVo.getUserId());
         if (!code.equals(emailCOde)) {
             throw new CustomException(ResponseStatusEnum.CODE_ERROR);
         }

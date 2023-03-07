@@ -84,4 +84,5 @@ public class UserInfoVo implements Serializable {
      * 用户内网IP
      */
     private List<String> intranetIPs;
+
 }

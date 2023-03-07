@@ -1,4 +1,4 @@
-package com.ailab.ailabsystem.model.vo;
+package com.ailab.ailabsystem.model.vo.labvo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModel;
@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @ApiModel
-public class ProjectVo implements Serializable {
+public class LabProjectVo implements Serializable {
 
     /**
      * 项目名
@@ -26,14 +26,19 @@ public class ProjectVo implements Serializable {
     private String level;
 
     /**
+     * 指导老师
+     */
+    private String teacherName;
+
+    /**
      * 项目成员角色
      */
     private String projectRole;
 
-    /**
-     * 项目状态（0代表未完成、1代表已完成）
-     */
-    private String status;
+//    /**
+//     * 项目状态（0代表未完成、1代表已完成）
+//     */
+//    private String status;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

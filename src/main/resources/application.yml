@@ -2,7 +2,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: AILab_System
+    name: AILabCardinal
 
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段

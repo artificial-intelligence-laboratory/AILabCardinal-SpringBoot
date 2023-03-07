@@ -3,11 +3,18 @@ package com.ailab.ailabsystem.util;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import com.ailab.ailabsystem.common.CommonConstant;
+import com.ailab.ailabsystem.enums.ResponseStatusEnum;
+import com.ailab.ailabsystem.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.invoke.ConstantCallSite;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -40,15 +47,24 @@ public class TimeUtil {
     }
 
     public static Date getGraduateTime(String year){
-
-        Date date = new Date();
-        try {
-            SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd ");
-            String graduateTime = year + GRADUATE_MONTH_DAY;
-            date = formatter.parse(graduateTime);
-        } catch (ParseException e) {
-            log.error("转换时间错误");
-        }
+//
+//        try {
+//            SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd ");
+//            String graduateTime = year + GRADUATE_MONTH_DAY;
+//            Date date = formatter.parse(graduateTime);
+//            return date;
+//        } catch (ParseException e) {
+//            log.error("转换时间错误");
+//            throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
+//        }
+        Date date = null;
+        String format = "yyyy-MM-dd";
+        Integer integer = Integer.valueOf(year);
+        integer = integer + 4;
+        year = String.valueOf(integer);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        LocalDate localDate = LocalDate.parse(year + GRADUATE_MONTH_DAY, formatter);
+        date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         return date;
     }
 

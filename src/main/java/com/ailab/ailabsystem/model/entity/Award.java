@@ -39,6 +39,11 @@ public class Award implements Serializable {
     private Integer awardLevel;
 
     /**
+     * 奖项名
+     */
+    private String awardName;
+
+    /**
      * 获奖时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")

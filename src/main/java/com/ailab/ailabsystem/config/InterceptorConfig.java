@@ -2,7 +2,6 @@ package com.ailab.ailabsystem.config;
 
 import com.ailab.ailabsystem.interceptor.LoginInterceptor;
 import com.ailab.ailabsystem.interceptor.RefreshTokenInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -29,13 +28,20 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns(
                         "/user/**",
                         "/passport/**",
-                        "/navigation/**")
+                        "/navigation/**",
+                        "/lab/**",
+                        "/fs/**")
                 .excludePathPatterns(
-                        "/passport/login"
+                        "/passport/login",
+                        "/lab/achievement",
+                        "/user/getSimpleUser"
                 ).order(1);
         registry.addInterceptor(refreshTokenInterceptor)
                 .addPathPatterns(
                         "/**"
+                ).excludePathPatterns(
+                        "/lab/achievement",
+                        "/user/getSimpleUser"
                 ).order(0);
     }
 }
