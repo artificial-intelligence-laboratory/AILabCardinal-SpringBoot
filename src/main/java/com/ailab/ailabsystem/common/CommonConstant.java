@@ -65,7 +65,7 @@ public class CommonConstant {
     /**
      * 年级前缀
      */
-    public static final String GRADE_PRE = "20";
+    public static final String GRADE_PRE = "2010";
 
 
     /**

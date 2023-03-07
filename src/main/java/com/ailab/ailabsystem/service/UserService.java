@@ -5,12 +5,9 @@ import com.ailab.ailabsystem.model.dto.LoginRequest;
 import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
-import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 用户服务
@@ -63,4 +60,5 @@ public interface UserService extends IService<User> {
     R bindEmail(Long userId, String email, String token);
 
     R getSimpleUserInfoList();
+
 }

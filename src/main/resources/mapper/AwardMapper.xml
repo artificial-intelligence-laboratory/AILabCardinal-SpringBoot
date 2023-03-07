@@ -9,13 +9,14 @@
             <result property="competitionId" column="competition_id" jdbcType="INTEGER"/>
             <result property="userId" column="user_id" jdbcType="INTEGER"/>
             <result property="awardLevel" column="award_level" jdbcType="TINYINT"/>
+            <result property="awardName" column="award_name" jdbcType="VARCHAR"/>
             <result property="awardTime" column="award_time" jdbcType="DATE"/>
             <result property="role" column="role" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         award_id,competition_id,user_id,
-        award_level,award_time,role
+        award_level,award_name, award_time,role
     </sql>
     <select id="getLabAwardCount" resultType="java.lang.Integer">
         SELECT COUNT(DISTINCT competition_id) FROM award

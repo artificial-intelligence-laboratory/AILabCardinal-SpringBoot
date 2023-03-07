@@ -3,11 +3,11 @@ package com.ailab.ailabsystem.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.constants.RedisKey;
-import com.ailab.ailabsystem.mapper.AwardMapper;
-import com.ailab.ailabsystem.mapper.ProjectMemberMapper;
+import com.ailab.ailabsystem.mapper.*;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.vo.IndexAiLabInfo;
+import com.ailab.ailabsystem.model.vo.labvo.LabAchievementVo;
+import com.ailab.ailabsystem.service.LabService;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.RedisOperator;
 import io.swagger.annotations.Api;
@@ -31,10 +31,13 @@ public class CommonLabController {
     private UserService userService;
 
     @Resource
+    private AwardMapper awardMapper;
+
+    @Resource
     private ProjectMemberMapper projectMemberMapper;
 
     @Resource
-    private AwardMapper awardMapper;
+    private LabService labService;
 
     @Resource
     private RedisOperator redis;
@@ -52,11 +55,20 @@ public class CommonLabController {
         userList = userList.stream().filter(user -> {
             return user.getUserRight() == 2 || user.getUserRight() == 3;
         }).collect(Collectors.toList());
-        aiLabInfo.setMemberCount(userList.size() - 1);
+        aiLabInfo.setMemberCount(userList.size());
         aiLabInfo.setProjectCount(projectMemberMapper.getLabProjectCount());
         aiLabInfo.setAwardCount(awardMapper.getLabAwardCount());
         String labInfoJsonStr = JSONUtil.toJsonStr(aiLabInfo);
         redis.set(INDEX_LAB_KEY, labInfoJsonStr, 60 * 30);
         return R.success(aiLabInfo);
     }
+
+    @ApiOperation(value = "获取实验室的成就", notes = "获取实验室的成就")
+    @GetMapping("/achievement")
+    public R getAILabAchievement() {
+
+        LabAchievementVo labAchievementVo = labService.getLabAchievement();
+        return R.success(labAchievementVo);
+    }
+
 }

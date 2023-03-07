@@ -54,7 +54,7 @@ public class LoginController {
     public R<Object> userLogin(HttpServletRequest request){
         String token = RequestUtil.getAuthorization(request);
         redis.del(USER_VO_KEY + token);
-        redis.del(LOGIN_UNIQUE_TOKEN + UserHolder.getUser().getUserId());
+        redis.del(LOGIN_UNIQUE_TOKEN + UserHolder.getUser().getStudentNumber());
         UserHolder.removeUser();
         return R.success();
     }
