@@ -414,7 +414,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //专业班级、年级、内网、头像
         userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
         //已在user_info表及其实体类增加grade字段
-        userInfoVo.setGrade(userInfo.getEnrollmentYear());
+        userInfoVo.setEnrollmentYear(userInfo.getEnrollmentYear());
         userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
         userInfoVo.setAvatar(getUserAvatar(userInfo.getUserId()));
         return userInfoVo;

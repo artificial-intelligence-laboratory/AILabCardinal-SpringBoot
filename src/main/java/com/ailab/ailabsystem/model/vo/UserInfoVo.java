@@ -76,9 +76,9 @@ public class UserInfoVo implements Serializable {
     private String githubId;
 
     /**
-     * 年级
+     * 入学年份
      */
-    private String grade;
+    private String enrollmentYear;
 
     /**
      * 用户内网IP

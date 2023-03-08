@@ -48,11 +48,11 @@ mybatis-plus:
 #================================================
 custom:
   swagger:
-    enable: true
+    enable: false
 
 logging:
   file:
-    path: /root/services/logging/AiLabCardinal-logging
+    path: /var/log/AiLabCardinal-logging
 
 ailabcardinal:
   version: 1.0.0

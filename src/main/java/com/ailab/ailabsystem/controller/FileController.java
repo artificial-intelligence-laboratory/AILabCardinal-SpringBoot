@@ -40,7 +40,7 @@ public class FileController {
     @Resource
     private SignInService signInService;
 
-    public static final String BASIC_DIR = "A:\\avatar\\";
+    public static final String BASIC_DIR = "/projectdata/OM/";
 
 //    http://localhost:8080/fs/exportSignInRecode?isRandom=true&startTime=%222022-4-17%22&endTime=%222022-4-29%22&num=2
 

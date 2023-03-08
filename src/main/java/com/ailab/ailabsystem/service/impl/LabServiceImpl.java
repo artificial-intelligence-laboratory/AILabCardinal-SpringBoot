@@ -45,7 +45,7 @@ public class LabServiceImpl implements LabService {
         LambdaQueryWrapper<Award> awardLambdaQueryWrapper = new LambdaQueryWrapper<>();
         projectLambdaQueryWrapper.orderByDesc(Project::getYear);
         List<Project> projectList = projectMapper.selectList(projectLambdaQueryWrapper);
-        awardLambdaQueryWrapper.orderByDesc(Award::getAwardTime);
+        awardLambdaQueryWrapper.orderByAsc(Award::getAwardLevel).orderByAsc(Award::getAwardId);
         List<Award> awardList = awardMapper.selectList(awardLambdaQueryWrapper);
         List<LabAwardVo> labAwardVoList = getLabAwardVoList(awardList);
         List<LabProjectVo> labProjectVoList = getLabProjectVoList(projectList);
