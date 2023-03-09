@@ -10,25 +10,18 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://ailab-system-datebase.org:3306/ailabsystem?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
-    url: jdbc:mysql://localhost:3306/ailabcardinal?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://172.17.0.3:3306/ailabcardinal?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     #    password: abc123
-    password: tencentYun123456
+    password: nfsn520
 
 
   redis:
-    host: r-7xv7ctef3xrpmphz49pd.redis.rds.aliyuncs.com
-    port: 6379
-    database: 3
-    username: hf
-    password: aLiYun123456
-    lettuce:
-      pool:
-        max-active: 10
-        max-idle: 10
-        min-idle: 1
-        time-between-eviction-runs: 10s
-    timeout: 10000
+    cluster:
+      nodes: 127.0.0.1:6371,127.0.0.1:6372,127.0.0.1:6373 # Redis集群节点
+      max-redirects: 3  # 最大重定向数，建议设置为3
+    timeout: 3000  # Redis连接超时时间，单位毫秒
+
   mail:
     default-encoding: UTF-8
     host: smtp.qq.com
