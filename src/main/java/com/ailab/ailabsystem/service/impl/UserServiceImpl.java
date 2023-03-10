@@ -18,7 +18,7 @@ import com.ailab.ailabsystem.model.entity.*;
 import com.ailab.ailabsystem.model.vo.*;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.MD5Util;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.TimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -63,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private CompetitionMapper competitionMapper;
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     @Override
     public R<Object> login(HttpServletRequest request, LoginRequest loginRequest) {
@@ -287,7 +287,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = this.getById(userId);
             userInfo = userInfoMapper.selectOne(queryWrapper);
             userInfoVo = getUserInfoVo(userInfo);
-            userInfoVo.setStudentNumber(user.getStudentNumber());
+            String studentNumber = user.getStudentNumber();
+            if (StrUtil.isNotBlank(studentNumber)) {
+                userInfoVo.setStudentNumber(studentNumber);
+            }
             //获取与用户相关的项目
             List<ProjectVo> userProjectVos = getUserProjectVos(userId);
             //获取与用户相关的奖项
@@ -414,7 +417,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //专业班级、年级、内网、头像
         userInfoVo.setMajorAndClassNumber(userInfo.getMajor() + userInfo.getClassNumber());
         //已在user_info表及其实体类增加grade字段
-        userInfoVo.setGrade(userInfo.getEnrollmentYear());
+        userInfoVo.setEnrollmentYear(userInfo.getEnrollmentYear());
+        System.out.println("查看用户id:" + userInfo.getUserId());
         userInfoVo.setIntranetIPs(getUserIntranetIPs(userInfo.getUserId()));
         userInfoVo.setAvatar(getUserAvatar(userInfo.getUserId()));
         return userInfoVo;
@@ -480,13 +484,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     private List<String> getUserIntranetIPs(Long userId) {
+        System.out.println("进入查询内网");
         QueryWrapper<Intranet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         List<Intranet> intranets = intranetMapper.selectList(queryWrapper);
+        if (intranets == null) {
+            return null;
+        }
         List<String> intranetIPs = null;
         for (Intranet intranet : intranets) {
             intranetIPs.add(intranet.getIntranetIp());
         }
+        System.out.println("离开查询内网");
         return intranetIPs;
     }
 
@@ -569,9 +578,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     private String getUserAvatar(Long userId) {
+        System.out.println("进入查询头像");
         if (userId == null) {
             throw new CustomException(ResponseStatusEnum.NOT_FOUND_ERROR);
         }
+        System.out.println("离开查询头像");
         return this.getById(userId).getAvatar();
     }
 

@@ -6,7 +6,7 @@ import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.IPUtil;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import java.util.Date;
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     @Resource
     private UserService userService;

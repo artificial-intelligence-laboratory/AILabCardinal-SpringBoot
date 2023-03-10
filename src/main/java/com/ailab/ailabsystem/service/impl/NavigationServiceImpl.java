@@ -10,7 +10,7 @@ import com.ailab.ailabsystem.model.entity.Site;
 import com.ailab.ailabsystem.model.entity.SiteType;
 import com.ailab.ailabsystem.model.vo.SiteVo;
 import com.ailab.ailabsystem.service.NavigationService;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +35,7 @@ public class NavigationServiceImpl extends ServiceImpl<SiteMapper, Site> impleme
     private SiteTypeMapper siteTypeMapper;
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     /**
      * 根据网站代码id查询对应类型网站列表

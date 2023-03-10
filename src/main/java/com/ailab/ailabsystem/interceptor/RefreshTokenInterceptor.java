@@ -7,7 +7,7 @@ import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.vo.UserVo;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ import static com.ailab.ailabsystem.constants.RedisConstants.LOGIN_UNIQUE_TOKEN;
 public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     @Resource
-    RedisOperator redis;
+    private RedisStringUtil redis;
 
 
     @Override
