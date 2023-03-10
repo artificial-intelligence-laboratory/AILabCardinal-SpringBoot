@@ -1,11 +1,10 @@
 package com.ailab.ailabsystem.controller;
 
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.model.dto.LoginRequest;
 import com.ailab.ailabsystem.service.UserService;
 import com.ailab.ailabsystem.util.CheckDataUtil;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.RequestUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import io.swagger.annotations.Api;
@@ -33,7 +32,7 @@ public class LoginController {
     private UserService userService;
 
     @Autowired
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     /**
      * 用户登陆

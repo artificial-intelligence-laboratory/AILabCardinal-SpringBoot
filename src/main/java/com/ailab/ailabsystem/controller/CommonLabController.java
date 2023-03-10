@@ -9,7 +9,7 @@ import com.ailab.ailabsystem.model.vo.IndexAiLabInfo;
 import com.ailab.ailabsystem.model.vo.labvo.LabAchievementVo;
 import com.ailab.ailabsystem.service.LabService;
 import com.ailab.ailabsystem.service.UserService;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +40,7 @@ public class CommonLabController {
     private LabService labService;
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     @ApiOperation(value = "获取实验室的基本信息", notes = "用于获取首页的实验室信息区")
     @GetMapping("/getLabInfo")

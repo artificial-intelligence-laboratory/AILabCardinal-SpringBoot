@@ -9,15 +9,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ailab.ailabsystem.common.CommonConstant;
 import com.ailab.ailabsystem.common.R;
-import com.ailab.ailabsystem.constants.RedisKey;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.dto.SingInRequest;
 import com.ailab.ailabsystem.model.dto.UserInfoDTO;
 import com.ailab.ailabsystem.model.entity.InOutRegistration;
 import com.ailab.ailabsystem.model.entity.User;
-import com.ailab.ailabsystem.model.entity.UserInfo;
-import com.ailab.ailabsystem.model.vo.UserInfoVo;
 import com.ailab.ailabsystem.model.vo.UserVo;
 import com.ailab.ailabsystem.service.SignInService;
 import com.ailab.ailabsystem.service.UserService;
@@ -28,14 +25,11 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,7 +48,7 @@ public class UserController {
     private static final ExecutorService SEND_EMAIL_EXECUTOR = Executors.newSingleThreadExecutor();
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     @Resource
     private UserService userService;
@@ -70,7 +64,8 @@ public class UserController {
     public R<Object> isSingIn() {
         UserVo userVo = UserHolder.getUser();
         // 判断是否已经签到
-        if (redis.keyIsExist(USER_SIGN_IN + userVo.getUserId())) {
+        String userSignInJsonStr = redis.get(USER_SIGN_IN + userVo.getUserId());
+        if (StrUtil.isBlank(userSignInJsonStr)) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         return R.success();
@@ -95,7 +90,8 @@ public class UserController {
         UserVo userVo = UserHolder.getUser();
         User user = userService.getById(userVo.getUserId());
         // 判断是否已经签到
-        if (redis.keyIsExist(USER_SIGN_IN + user.getUserId())) {
+        String userSignInJsonStr = redis.get(USER_SIGN_IN + user.getUserId());
+        if (StrUtil.isBlank(userSignInJsonStr)) {
             throw new CustomException(ResponseStatusEnum.SGININ_ERROR);
         }
         // 获取签出时间

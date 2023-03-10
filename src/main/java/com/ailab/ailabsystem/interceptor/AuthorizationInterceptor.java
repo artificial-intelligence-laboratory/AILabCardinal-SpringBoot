@@ -4,9 +4,8 @@ import com.ailab.ailabsystem.annotation.AuthCheck;
 import com.ailab.ailabsystem.enums.ResponseStatusEnum;
 import com.ailab.ailabsystem.enums.UserRole;
 import com.ailab.ailabsystem.exception.CustomException;
-import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.vo.UserVo;
-import com.ailab.ailabsystem.util.RedisOperator;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.UserHolder;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -25,7 +24,7 @@ import javax.annotation.Resource;
 public class AuthorizationInterceptor {
 
     @Resource
-    private RedisOperator redis;
+    private RedisStringUtil redis;
 
     @Around("@annotation(authCheck)")
     public Object doInterceptor(ProceedingJoinPoint joinPoint,
