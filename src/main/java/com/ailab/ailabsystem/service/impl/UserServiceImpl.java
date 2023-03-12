@@ -155,10 +155,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userSimpleVo.setAvatar(user.getAvatar());
             UserInfo userInfo = userInfoMapper.selectById(userInfoVo.getUserInfoId());
             String enrollmentYear = userInfo.getEnrollmentYear();
+            userSimpleVo.setGrade(enrollmentYear);
             if (currentOrPrevious(enrollmentYear)) {
                 previousStudents.add(userSimpleVo);
             } else {
-                userSimpleVo.setGrade(enrollmentYear);
                 currentStudents.add(userSimpleVo);
             }
         });
@@ -323,7 +323,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfoMapper.updateById(userInfo);
         User user = this.getById(userInfo.getUserId());
         UserVo userVo = BeanUtil.copyProperties(user, UserVo.class);
+        userVo.setNickname(userInfo.getRealName());
+        userVo.setGithubUrl(userInfo.getGithubId());
         redis.set(USER_VO_KEY + token, JSONUtil.toJsonStr(userVo), USER_VO_TTL);
+        redis.del(INDEX_USER_INFO + userVo.getUserId());
         redis.del(USER_DETAILS_KEY + user.getUserId());
         log.info("用户信息{}",userInfo);
         return R.success();
@@ -433,7 +436,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     private boolean currentOrPrevious(String enrollmentYear) {
         if (enrollmentYear == null) {
-            throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
+            return true;
         }
         long millis = System.currentTimeMillis();
         long time = TimeUtil.getGraduateTime(enrollmentYear).getTime();
@@ -488,11 +491,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<Intranet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         List<Intranet> intranets = intranetMapper.selectList(queryWrapper);
-        if (intranets == null) {
+        if (intranets == null || intranets.isEmpty()) {
             return null;
         }
-        List<String> intranetIPs = null;
+        List<String> intranetIPs = new ArrayList<>();
         for (Intranet intranet : intranets) {
+            System.out.println("内网信息：" + intranet);
             intranetIPs.add(intranet.getIntranetIp());
         }
         System.out.println("离开查询内网");
@@ -582,8 +586,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userId == null) {
             throw new CustomException(ResponseStatusEnum.NOT_FOUND_ERROR);
         }
-        System.out.println("离开查询头像");
-        return this.getById(userId).getAvatar();
+        User user = this.getById(userId);
+        System.out.println("查询头像:" + user.getAvatar());
+        return user.getAvatar();
     }
 
     private List<AwardVo> getUserAwardVos(Long userId) {

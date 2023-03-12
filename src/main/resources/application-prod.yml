@@ -34,7 +34,6 @@ spring:
     port: 587
     protocol: smtp
 
-
 mybatis-plus:
   configuration:
     # 配置日记
@@ -43,6 +42,12 @@ mybatis-plus:
 #================================================
 # 自定义配置
 #================================================
+minio:
+  endpoint: http://192.168.87.186:9000
+  access-Key: 3KCAO08E2ZASV3X33M4G
+  secret-Key: VIqHY7Dn0ZUJaOqk50zyxvjdmtqUaglX2t0NQ5ue
+  bucket-Name: ailabcardinal
+
 custom:
   swagger:
     enable: false
