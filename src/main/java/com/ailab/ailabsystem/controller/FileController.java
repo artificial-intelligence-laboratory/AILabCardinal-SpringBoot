@@ -10,6 +10,7 @@ import com.ailab.ailabsystem.exception.CustomException;
 import com.ailab.ailabsystem.model.entity.InOutRegistration;
 import com.ailab.ailabsystem.model.vo.InOutRegistrationVo;
 import com.ailab.ailabsystem.service.SignInService;
+import com.ailab.ailabsystem.service.impl.MinioService;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import io.swagger.annotations.Api;
@@ -39,6 +40,9 @@ public class FileController {
 
     @Resource
     private SignInService signInService;
+
+    @Resource
+    private MinioService minioService;
 
     public static final String BASIC_DIR = "/projectdata/OM/";
 
@@ -80,39 +84,37 @@ public class FileController {
     }
 
 
+//    @ApiOperation(value = "上传图片", notes = "上传用户头像")
+//    @PostMapping("/getImageUrl")
+//    public R uploadImage(@RequestParam("file") MultipartFile image) {
+//        if (ObjectUtil.isNull(image)) {
+//            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
+//        }
+//        try {
+//            // 获取原始文件名称
+//            String originalFilename = image.getOriginalFilename();
+//            // 生成新文件名
+//            String fileName = createNewFileName(originalFilename);
+//            // 保存文件
+//            image.transferTo(new File(fileName));
+//            // 返回结果
+//            log.debug("文件上传成功，{}", fileName);
+//            return R.success(fileName);
+//        } catch (IOException e) {
+//            throw new RuntimeException("文件上传失败", e);
+//        }
+//    }
+
     @ApiOperation(value = "上传图片", notes = "上传用户头像")
-    @PostMapping("/getImageUrl")
-    public R uploadImage(@RequestParam("file") MultipartFile image) {
-        if (ObjectUtil.isNull(image)) {
-            throw new CustomException(ResponseStatusEnum.PARAMS_ERROR);
-        }
+    @PostMapping("/uploadAvatar")
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile file) {
         try {
-            // 获取原始文件名称
-            String originalFilename = image.getOriginalFilename();
-            // 生成新文件名
-            String fileName = createNewFileName(originalFilename);
-            // 保存文件
-            image.transferTo(new File(fileName));
-            // 返回结果
-            log.debug("文件上传成功，{}", fileName);
-            return R.success(fileName);
-        } catch (IOException e) {
-            throw new RuntimeException("文件上传失败", e);
+            String url = minioService.uploadAvatar(file);
+            return url;
+        } catch (Exception e) {
+            throw new CustomException(ResponseStatusEnum.SYSTEM_ERROR);
         }
     }
 
-    private String createNewFileName(String originalFilename) {
-        // 获取后缀
-        String suffix = StrUtil.subAfter(originalFilename, ".", true);
-        // 生成目录
-        String name = UUID.randomUUID().toString();
-        // 判断目录是否存在
-        File dir = new File(BASIC_DIR);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        // 生成文件名
-        return BASIC_DIR + name + "." + suffix;
-    }
 
 }
