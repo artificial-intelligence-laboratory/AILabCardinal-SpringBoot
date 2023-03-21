@@ -20,7 +20,7 @@ spring:
     cluster:
       nodes: 192.168.87.186:6371,192.168.87.186:6372,192.168.87.186:6373  # Redis集群节点
       max-redirects: 3  # 最大重定向数，建议设置为3
-    timeout: 3000  # Redis连接超时时间，单位毫秒
+    timeout: 10000  # Redis连接超时时间，单位毫秒
     jedis:
       pool:
         max-idle: 100

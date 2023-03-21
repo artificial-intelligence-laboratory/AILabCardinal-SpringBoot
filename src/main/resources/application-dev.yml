@@ -50,9 +50,5 @@ custom:
   swagger:
     enable: true
 
-logging:
-  file:
-    path: A:\Java项目文件\AILab\AiLabCardinal-logging
-
 ailabcardinal:
   version: 1.0.0
