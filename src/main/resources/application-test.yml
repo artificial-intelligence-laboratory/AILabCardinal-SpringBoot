@@ -10,25 +10,22 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://ailab-system-datebase.org:3306/ailabsystem?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
-    url: jdbc:mysql://localhost:3306/ailabcardinal?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.87.186:3306/ailabcardinal?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     #    password: abc123
-    password: 12345678
+    password: nfsn520
 
 
   redis:
-    host: r-7xv7ctef3xrpmphz49pd.redis.rds.aliyuncs.com
-    port: 6379
-    database: 3
-    username: hf
-    password: aLiYun123456
-    lettuce:
+    cluster:
+      nodes: 192.168.87.186:6371,192.168.87.186:6372,192.168.87.186:6373  # Redis集群节点
+      max-redirects: 3  # 最大重定向数，建议设置为3
+    timeout: 3000  # Redis连接超时时间，单位毫秒
+    jedis:
       pool:
-        max-active: 10
-        max-idle: 10
-        min-idle: 1
-        time-between-eviction-runs: 10s
-    timeout: 10000
+        max-idle: 100
+        max-wait: 1
+
   mail:
     default-encoding: UTF-8
     host: smtp.qq.com
@@ -36,7 +33,6 @@ spring:
     password: meamkpgfjdegbhcb
     port: 587
     protocol: smtp
-
 
 mybatis-plus:
   configuration:
@@ -46,13 +42,19 @@ mybatis-plus:
 #================================================
 # 自定义配置
 #================================================
+minio:
+  endpoint: http://192.168.87.186:9000
+  access-Key: 3KCAO08E2ZASV3X33M4G
+  secret-Key: VIqHY7Dn0ZUJaOqk50zyxvjdmtqUaglX2t0NQ5ue
+  bucket-Name: ailabcardinal
+
 custom:
   swagger:
-    enable: true
+    enable: false
 
 logging:
   file:
-    path: A:\Java项目文件\AILab\AiLabCardinal-logging
+    path: /var/log/AiLabCardinal-logging
 
 ailabcardinal:
   version: 1.0.0
