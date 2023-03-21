@@ -61,4 +61,6 @@ public interface UserService extends IService<User> {
 
     R getSimpleUserInfoList();
 
+    boolean currentOrPrevious(String enrollmentYear);
+
 }

@@ -31,6 +31,9 @@ public class CommonLabController {
     private UserService userService;
 
     @Resource
+    private UserInfoMapper userInfoMapper;
+
+    @Resource
     private AwardMapper awardMapper;
 
     @Resource
@@ -53,7 +56,9 @@ public class CommonLabController {
         List<User> userList = userService.list();
         //去掉非实验室成员
         userList = userList.stream().filter(user -> {
-            return user.getUserRight() == 2 || user.getUserRight() == 3;
+            return user.getUserRight() == 2
+                    || user.getUserRight() == 3
+                    || !userService.currentOrPrevious(userInfoMapper.selectById(user.getUserInfo()).getEnrollmentYear()) ;
         }).collect(Collectors.toList());
         aiLabInfo.setMemberCount(userList.size());
         aiLabInfo.setProjectCount(projectMemberMapper.getLabProjectCount());

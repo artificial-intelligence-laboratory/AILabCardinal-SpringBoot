@@ -6,6 +6,7 @@ import com.ailab.ailabsystem.model.entity.Site;
 import com.ailab.ailabsystem.model.entity.User;
 import com.ailab.ailabsystem.model.entity.UserInfo;
 import com.ailab.ailabsystem.service.UserService;
+import com.ailab.ailabsystem.util.RedisStringUtil;
 import com.ailab.ailabsystem.util.SendEmailUtils;
 import com.ailab.ailabsystem.util.TimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -47,6 +48,9 @@ class AilabsystemApplicationTests {
 
     @Autowired
     private SendEmailUtils sendEmailUtils;
+
+    @Autowired
+    private RedisStringUtil redis;
 
 
     @Test
@@ -118,6 +122,11 @@ class AilabsystemApplicationTests {
             userInfo.setJoinAilabTime(null);
             userInfoMapper.updateById(userInfo);
         });
+    }
+
+    @Test
+    void testRedisConnect() {
+        redis.set("test:connect", "hello");
     }
 
 
