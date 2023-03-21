@@ -434,7 +434,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param enrollmentYear
      * @return true代表往届，false代表本届
      */
-    private boolean currentOrPrevious(String enrollmentYear) {
+    @Override
+    public boolean currentOrPrevious(String enrollmentYear) {
         if (enrollmentYear == null) {
             return true;
         }
